@@ -1,6 +1,6 @@
 body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background-color: #f0f2f5;
+    background: linear-gradient(135deg, #f0f2f5 0%, #ffffff 100%);
     margin: 0;
     padding: 20px;
     display: flex;
@@ -13,10 +13,11 @@ body {
     text-align: center;
     width: 90%;
     max-width: 700px;
-    padding: 30px;
-    background: white;
+    margin-top: 50px;
+    padding: 35px;
+    background-color: #fff;
     border-radius: 16px;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
 }
 
 h1 {
@@ -96,7 +97,7 @@ textarea:focus {
 }
 
 button[type="submit"] {
-    background-color: #007bff;
+    background-color: #4299e1;
     color: white;
     border: none;
     padding: 12px 28px;
@@ -108,7 +109,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #0056b3;
+    background-color: #3182ce;
     transform: translateY(-1px);
 }
 
