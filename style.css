@@ -96,7 +96,7 @@ textarea:focus {
 }
 
 button[type="submit"] {
-    background-color: #007bff;
+    background-color: #4299e1;
     color: white;
     border: none;
     padding: 12px 28px;
@@ -108,7 +108,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #0056b3;
+    background-color: #3182ce;
     transform: translateY(-1px);
 }
 
