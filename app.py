@@ -11,7 +11,7 @@ load_dotenv()
 # Set Tesseract command path for Mac (installed via Homebrew)
 pytesseract.pytesseract.tesseract_cmd = '/opt/homebrew/bin/tesseract'
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static', static_folder='static')
 
 # Initialize the client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
