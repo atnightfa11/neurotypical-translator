@@ -8,8 +8,11 @@ import io
 
 load_dotenv()
 
-# Set Tesseract command path for Mac (installed via Homebrew)
-pytesseract.pytesseract.tesseract_cmd = '/opt/homebrew/bin/tesseract'
+# Set Tesseract command path based on environment
+if os.path.exists('/opt/homebrew/bin/tesseract'):  # Mac
+    pytesseract.pytesseract.tesseract_cmd = '/opt/homebrew/bin/tesseract'
+elif os.path.exists('/usr/bin/tesseract'):  # Linux/Render
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
