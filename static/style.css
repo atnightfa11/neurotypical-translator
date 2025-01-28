@@ -8,6 +8,13 @@
     --spacing-unit: 1rem;
     --max-width: 700px;
     --border-radius: 12px;
+    /* Dark mode colors */
+    --bg-dark-primary: #1a1a1a;
+    --bg-dark-secondary: #2d2d2d;
+    --text-dark: #e0e0e0;
+    --border-dark: #404040;
+    /* Transition speeds */
+    --transition-speed: 0.3s;
 }
 
 body {
@@ -19,20 +26,22 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    transition: background-color 0.3s ease;
+    transition: background-color var(--transition-speed) ease,
+                color var(--transition-speed) ease;
 }
 
 .container {
     text-align: center;
     width: 90%;
     max-width: var(--max-width);
-    margin-top: 50px;
-    padding: 35px;
+    margin: 20px auto;
+    padding: 30px;
     background-color: #fff;
     border-radius: var(--border-radius);
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease;
 }
 
 h1 {
@@ -48,17 +57,22 @@ h1 {
     line-height: 1.4;
 }
 
+.input-area {
+    position: relative;
+}
+
 textarea {
-    width: calc(100% - 24px);
+    width: 100%;
+    box-sizing: border-box;
     height: 120px;
     padding: 12px;
+    margin: 0;
     border: 1px solid #ddd;
     border-radius: 8px;
-    margin-bottom: 20px;
     font-size: 1em;
     line-height: 1.5;
     resize: vertical;
-    transition: border-color 0.3s ease;
+    background: white;
 }
 
 textarea:focus {
@@ -67,50 +81,52 @@ textarea:focus {
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
 }
 
+/* Common container width for all elements */
+.form-element {
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto 20px;
+    border-radius: var(--border-radius);
+    box-sizing: border-box;
+}
+
 .mode-select {
-    margin: 0 0 20px 0;
+    padding: 15px;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     display: flex;
     justify-content: center;
     gap: 25px;
-    background: var(--bg-light);
-    padding: var(--spacing-unit);
-    border-radius: var(--border-radius);
-    margin-bottom: var(--spacing-unit);
 }
 
 .mode-select label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 0.95em;
-    color: #444;
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
 .tone-select {
-    margin: 0 0 25px 0;
     background: var(--bg-light);
-    padding: var(--spacing-unit);
-    border-radius: var(--border-radius);
-    margin-bottom: var(--spacing-unit);
+    padding: 15px;
 }
 
 .tone-select label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: #444;
-    font-size: 0.95em;
+    font-size: 0.9em;
 }
 
 .tone-select select {
     width: 100%;
-    padding: 10px;
+    padding: 8px;
     font-size: 0.95em;
     border-radius: 8px;
     border: 1px solid #ddd;
     background-color: white;
     cursor: pointer;
     color: #333;
+    background-image: url("data:image/svg+xml,...");
 }
 
 .tone-select select:focus {
@@ -166,15 +182,46 @@ button[type="submit"]:active {
     
     .container {
         padding: 20px;
+        margin: 10px;
+        width: calc(100% - 20px);
     }
     
     .mode-select {
         flex-direction: column;
-        gap: 15px;
+        gap: 12px;
+        padding: 10px;
     }
     
     h1 {
         font-size: 1.8em;
+    }
+    
+    textarea {
+        height: 150px;  /* Slightly taller on mobile */
+    }
+    
+    .input-actions {
+        position: static;
+        margin: 8px 0;
+        justify-content: flex-end;
+    }
+    
+    .action-button {
+        padding: 8px 12px;  /* Larger touch target */
+    }
+    
+    .tone-select select {
+        font-size: 16px;  /* Prevent zoom on mobile */
+        padding: 10px;    /* Larger touch target */
+    }
+    
+    /* Improve spacing on mobile */
+    .form-element,
+    .mode-select,
+    .tone-select,
+    .context-explanation {
+        margin-bottom: 15px;
+        padding: 12px;
     }
 }
 
@@ -192,14 +239,35 @@ button[type="submit"]:active {
     display: none;
     color: #666;
     margin: 10px 0;
+    position: relative;
+    padding-left: 24px;
+}
+
+.loading::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    border: 2px solid var(--primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 .character-count {
     color: #666;
     font-size: 0.8em;
-    text-align: right;
+    text-align: left;
     margin-top: -15px;
     margin-bottom: 15px;
+    padding-left: 2px;
 }
 
 /* High contrast mode toggle */
@@ -216,13 +284,14 @@ button[type="submit"]:active {
 
 /* High contrast theme */
 .high-contrast {
-    background-color: #000;
+    background-color: var(--bg-dark-primary);
     color: #fff;
 }
 
 .high-contrast .container {
-    background: #222;
-    color: #fff;
+    background: var(--bg-dark-secondary);
+    color: var(--text-dark);
+    border-color: var(--border-dark);
 }
 
 .high-contrast textarea,
@@ -235,8 +304,6 @@ button[type="submit"]:active {
 /* High contrast theme improvements */
 .high-contrast h1,
 .high-contrast .description,
-.high-contrast .mode-select label,
-.high-contrast .tone-select label,
 .high-contrast #result {
     color: #fff;
 }
@@ -294,38 +361,13 @@ button:focus {
 .mode-select,
 .tone-select,
 .context-explanation {
-    background: var(--bg-light);
-    padding: var(--spacing-unit);
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto 20px;
     border-radius: var(--border-radius);
-    margin-bottom: var(--spacing-unit);
-}
-
-/* Speech input button styling */
-.speech-input {
-    background-color: var(--primary);
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    font-size: 0.9em;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-bottom: var(--spacing-unit);
-}
-
-.speech-input:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-1px);
-}
-
-.speech-input:active {
-    transform: translateY(0);
-}
-
-/* High contrast mode for speech button */
-.high-contrast .speech-input {
-    background-color: #333;
-    border: 1px solid #555;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 15px;
 }
 
 /* Input methods container */
@@ -388,6 +430,277 @@ button:focus {
 .high-contrast .upload-zone.dragover {
     border-color: #63b3ed;
     background: #2d3748;
+}
+
+/* Input method tabs */
+.input-methods-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.tab-button {
+    background: var(--bg-light);
+    border: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.tab-button.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Input panels */
+.input-panels {
+    position: relative;
+    min-height: 120px;  /* Reduced from default */
+}
+
+.panel {
+    display: none;
+    margin-bottom: 20px;
+}
+
+.panel.active {
+    display: block;
+}
+
+/* Speech panel specific */
+.speech-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+}
+
+.speech-container p {
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+/* Helper buttons */
+.input-helpers {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: -10px 0 15px 0;
+}
+
+.helper-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.helper-button {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.helper-button:hover {
+    opacity: 1;
+}
+
+.input-actions {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-light);
+    border: 1px solid #e2e8f0;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.action-button:hover {
+    background: white;
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Context explanation with reduced prominence */
+.context-explanation {
+    padding: 15px;
+    background: var(--bg-light);
+    opacity: 0.85;
+}
+
+.context-explanation label {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Submit button container */
+.submit-container {
+    text-align: center;
+}
+
+/* Apply form-element class properties to all main sections */
+.mode-select,
+.tone-select,
+.context-explanation,
+.submit-container {
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto 20px;
+    border-radius: var(--border-radius);
+}
+
+/* Error states */
+.error-message {
+    color: #e53e3e;
+    font-size: 0.9em;
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: #fff5f5;
+    border-radius: 6px;
+    display: none;
+}
+
+.error-message.visible {
+    display: block;
+}
+
+/* Focus states for better keyboard navigation */
+.action-button:focus-visible,
+.mode-select input:focus-visible + label,
+.context-explanation input:focus-visible + label {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+/* Loading states for buttons */
+.action-button.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.action-button.loading svg {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* Smooth transitions for dark mode */
+.container,
+textarea,
+select,
+button,
+.mode-select,
+.tone-select,
+.context-explanation {
+    transition: background-color var(--transition-speed) ease,
+                border-color var(--transition-speed) ease,
+                color var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease;
+}
+
+/* Additional accessibility features */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* ARIA live region for status updates */
+.status-message {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Focus indicator improvements */
+*:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Mode select dark mode */
+.high-contrast .mode-select {
+    background: var(--bg-dark-secondary);
+    border-color: var(--border-dark);
+}
+
+.high-contrast .mode-select label {
+    color: var(--text-dark);
+}
+
+/* Tone select dark mode */
+.high-contrast .tone-select {
+    background: var(--bg-dark-secondary);
+    border-color: var(--border-dark);
+}
+
+.high-contrast .tone-select label {
+    color: var(--text-dark);
+}
+
+.high-contrast .tone-select select {
+    background-color: var(--bg-dark-primary);
+    color: var(--text-dark);
+    border-color: var(--border-dark);
+}
+
+.high-contrast .tone-select select option {
+    background-color: var(--bg-dark-primary);
+    color: var(--text-dark);
+}
+
+/* Context explanation dark mode */
+.high-contrast .context-explanation {
+    background: var(--bg-dark-secondary);
+    border-color: var(--border-dark);
+}
+
+.high-contrast .context-explanation label {
+    color: var(--text-dark);
+}
+
+/* High contrast mode for character count */
+.high-contrast .character-count {
+    color: var(--text-dark);
 }
 
 

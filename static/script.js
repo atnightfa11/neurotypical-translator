@@ -35,44 +35,29 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.contains('high-contrast'));
     });
 
-    // Show loading state during translation
-    form.addEventListener("submit", async function(e) {
-        e.preventDefault();
-        loading.style.display = 'block';
+    // Form submission handler
+    document.getElementById("translator-form").addEventListener("submit", async function(e) {
+        e.preventDefault();  // Prevent default form submission
+        
+        const formData = new FormData(this);
         
         try {
-            const inputText = document.getElementById("input-text").value;
-            const mode = document.querySelector('input[name="mode"]:checked').value;
-            const tone = document.getElementById("tone").value;
-            const explainContext = document.getElementById("explain-context").checked;
+            loading.style.display = 'block';
             
             const response = await fetch("/", {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams({ 
-                    input_text: inputText, 
-                    mode: mode, 
-                    tone: tone, 
-                    explain_context: explainContext ? "yes" : "no"
-                })
+                body: formData
             });
             
             const result = await response.json();
-            
             if (result.error) {
                 alert(result.error);
             } else {
                 const resultDiv = document.getElementById("result");
-                
-                // Replace double newlines with two <br> tags, and single newlines with one <br>
-                // so the explanation and translation display clearly as separate lines/paragraphs
                 const formatted = result.result
-                    .replace(/\n{2,}/g, '<br><br>')  // two newlines => two <br>
-                    .replace(/\n/g, '<br>');         // single newline => one <br>
-
+                    .replace(/\n{2,}/g, '<br><br>')
+                    .replace(/\n/g, '<br>');
                 resultDiv.innerHTML = formatted;
-
-                // Smooth scroll to result
                 resultDiv.scrollIntoView({ behavior: 'smooth' });
             }
         } catch (error) {
@@ -87,126 +72,104 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.add('high-contrast');
     }
 
-    // Add speech recognition functionality
-    function initSpeechRecognition() {
-        if ('webkitSpeechRecognition' in window) {
-            const recognition = new webkitSpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            
-            // Add speech button to UI
-            const speechButton = document.createElement('button');
-            speechButton.className = 'speech-input';
-            speechButton.innerHTML = '<span role="img" aria-label="microphone">🎤</span> Speak';
-            speechButton.setAttribute('type', 'button');  // Prevent form submission
-            
-            // Add button next to textarea
-            const textarea = document.getElementById('input-text');
-            textarea.parentNode.insertBefore(speechButton, textarea.nextSibling);
-            
-            let isRecording = false;
-            
-            // Handle speech input
-            speechButton.onclick = function() {
-                if (isRecording) {
-                    recognition.stop();
-                    speechButton.innerHTML = '<span role="img" aria-label="microphone">🎤</span> Speak';
-                } else {
-                    recognition.start();
-                    speechButton.innerHTML = '<span role="img" aria-label="recording">⏺</span> Recording...';
-                }
-                isRecording = !isRecording;
-            };
-            
-            recognition.onresult = function(event) {
-                textarea.value = event.results[0][0].transcript;
-                // Trigger character count update
-                textarea.dispatchEvent(new Event('input'));
-            };
-            
-            recognition.onerror = function(event) {
-                console.error('Speech recognition error:', event.error);
-                speechButton.innerHTML = '<span role="img" aria-label="microphone">🎤</span> Speak';
-                isRecording = false;
-            };
-            
-            recognition.onend = function() {
-                speechButton.innerHTML = '<span role="img" aria-label="microphone">🎤</span> Speak';
-                isRecording = false;
-            };
-        }
-    }
-
     // Initialize speech recognition
-    initSpeechRecognition();
-
-    // File upload handling
-    const uploadZone = document.getElementById('upload-zone');
+    const speakButton = document.getElementById('speak-button');
+    const uploadButton = document.getElementById('upload-button');
     const fileInput = document.getElementById('file-input');
-
-    // Handle drag and drop
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        uploadZone.addEventListener(eventName, preventDefaults, false);
-    });
-
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    
+    // Check for different speech recognition APIs
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        
+        let isRecording = false;
+        
+        speakButton.onclick = function() {
+            if (isRecording) {
+                recognition.stop();
+                speakButton.innerHTML = `
+                    <svg viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor" d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                        <path fill="currentColor" d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                    <span>Speak</span>`;
+            } else {
+                try {
+                    recognition.start();
+                    speakButton.innerHTML = `
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <circle cx="12" cy="12" r="8" fill="currentColor"/>
+                        </svg>
+                        <span>Recording...</span>`;
+                } catch (err) {
+                    showError('Failed to start recording. Please try again.', speakButton);
+                    isRecording = false;
+                    return;
+                }
+            }
+            isRecording = !isRecording;
+        };
+        
+        recognition.onresult = function(event) {
+            const textarea = document.getElementById('input-text');
+            if (event.results[0][0]) {
+                textarea.value = event.results[0][0].transcript;
+                // Create a submit event that can bubble
+                const submitEvent = new Event('submit', {
+                    bubbles: true,
+                    cancelable: true
+                });
+                document.getElementById('translator-form').dispatchEvent(submitEvent);
+            }
+        };
+    } else {
+        // Hide speech button if not supported
+        speakButton.style.display = 'none';
+        console.log('Speech recognition is not supported in this browser');
     }
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-        uploadZone.addEventListener(eventName, highlight, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        uploadZone.addEventListener(eventName, unhighlight, false);
-    });
-
-    function highlight(e) {
-        uploadZone.classList.add('dragover');
+    // Error handling helper
+    function showError(message, element) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message visible';
+        errorDiv.textContent = message;
+        element.parentNode.insertBefore(errorDiv, element.nextSibling);
+        setTimeout(() => errorDiv.remove(), 5000);
     }
 
-    function unhighlight(e) {
-        uploadZone.classList.remove('dragover');
-    }
-
-    uploadZone.addEventListener('drop', handleDrop, false);
-    uploadZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', handleFiles);
-
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        handleFiles({ target: { files: files } });
-    }
-
-    async function handleFiles(e) {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
+    // Handle file upload
+    uploadButton.onclick = () => fileInput.click();
+    
+    fileInput.onchange = async function(e) {
+        if (this.files && this.files[0]) {
+            uploadButton.classList.add('loading');
             const formData = new FormData();
-            formData.append('image', file);
-
+            formData.append('image', this.files[0]);
+            
             try {
                 loading.style.display = 'block';
                 const response = await fetch('/process-image', {
                     method: 'POST',
                     body: formData
                 });
-
+                
                 const result = await response.json();
                 if (result.error) {
-                    alert(result.error);
+                    showError(result.error, fileInput);
                 } else {
                     document.getElementById('input-text').value = result.text;
                     document.getElementById('input-text').dispatchEvent(new Event('input'));
                 }
             } catch (error) {
-                alert('Error processing image. Please try again.');
+                showError('Error processing image. Please try again.', fileInput);
             } finally {
                 loading.style.display = 'none';
+                uploadButton.classList.remove('loading');
             }
-        } else {
-            alert('Please upload an image file.');
         }
-    }
+    };
 });
