@@ -86,4 +86,127 @@ document.addEventListener('DOMContentLoaded', function() {
     if (localStorage.getItem('highContrast') === 'true') {
         document.body.classList.add('high-contrast');
     }
+
+    // Add speech recognition functionality
+    function initSpeechRecognition() {
+        if ('webkitSpeechRecognition' in window) {
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            
+            // Add speech button to UI
+            const speechButton = document.createElement('button');
+            speechButton.className = 'speech-input';
+            speechButton.innerHTML = '<span role="img" aria-label="microphone">🎤</span> Speak';
+            speechButton.setAttribute('type', 'button');  // Prevent form submission
+            
+            // Add button next to textarea
+            const textarea = document.getElementById('input-text');
+            textarea.parentNode.insertBefore(speechButton, textarea.nextSibling);
+            
+            let isRecording = false;
+            
+            // Handle speech input
+            speechButton.onclick = function() {
+                if (isRecording) {
+                    recognition.stop();
+                    speechButton.innerHTML = '<span role="img" aria-label="microphone">🎤</span> Speak';
+                } else {
+                    recognition.start();
+                    speechButton.innerHTML = '<span role="img" aria-label="recording">⏺</span> Recording...';
+                }
+                isRecording = !isRecording;
+            };
+            
+            recognition.onresult = function(event) {
+                textarea.value = event.results[0][0].transcript;
+                // Trigger character count update
+                textarea.dispatchEvent(new Event('input'));
+            };
+            
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                speechButton.innerHTML = '<span role="img" aria-label="microphone">🎤</span> Speak';
+                isRecording = false;
+            };
+            
+            recognition.onend = function() {
+                speechButton.innerHTML = '<span role="img" aria-label="microphone">🎤</span> Speak';
+                isRecording = false;
+            };
+        }
+    }
+
+    // Initialize speech recognition
+    initSpeechRecognition();
+
+    // File upload handling
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+
+    // Handle drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        uploadZone.classList.add('dragover');
+    }
+
+    function unhighlight(e) {
+        uploadZone.classList.remove('dragover');
+    }
+
+    uploadZone.addEventListener('drop', handleDrop, false);
+    uploadZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', handleFiles);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles({ target: { files: files } });
+    }
+
+    async function handleFiles(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                loading.style.display = 'block';
+                const response = await fetch('/process-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.error) {
+                    alert(result.error);
+                } else {
+                    document.getElementById('input-text').value = result.text;
+                    document.getElementById('input-text').dispatchEvent(new Event('input'));
+                }
+            } catch (error) {
+                alert('Error processing image. Please try again.');
+            } finally {
+                loading.style.display = 'none';
+            }
+        } else {
+            alert('Please upload an image file.');
+        }
+    }
 });

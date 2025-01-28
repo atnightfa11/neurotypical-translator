@@ -13,7 +13,18 @@
         <h1>Neurotypical Translator</h1>
         <p class="description">This tool helps neurotypical & neurodivergent individuals communicate.</p>
         <form id="translator-form">
-            <textarea name="input_text" id="input-text" placeholder="Enter your phrase..." aria-label="Text to translate" maxlength="500"></textarea>
+            <div class="input-methods">
+                <div class="text-input">
+                    <textarea name="input_text" id="input-text" placeholder="Enter your phrase..." aria-label="Text to translate" maxlength="500"></textarea>
+                </div>
+                <div class="upload-zone" id="upload-zone">
+                    <input type="file" id="file-input" accept="image/*" hidden>
+                    <div class="upload-content">
+                        <span role="img" aria-label="upload">📷</span>
+                        <p>Drop a screenshot here or click to upload</p>
+                    </div>
+                </div>
+            </div>
             <div class="mode-select">
                 <label>
                     <input type="radio" name="mode" value="nt-to-nd" checked> Neurotypical → Neurodivergent

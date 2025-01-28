@@ -5,6 +5,9 @@
     --text-secondary: #4a5568;
     --bg-light: #f7fafc;
     --bg-dark: #1a202c;
+    --spacing-unit: 1rem;
+    --max-width: 700px;
+    --border-radius: 12px;
 }
 
 body {
@@ -22,12 +25,13 @@ body {
 .container {
     text-align: center;
     width: 90%;
-    max-width: 700px;
+    max-width: var(--max-width);
     margin-top: 50px;
     padding: 35px;
     background-color: #fff;
-    border-radius: 16px;
+    border-radius: var(--border-radius);
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -68,6 +72,10 @@ textarea:focus {
     display: flex;
     justify-content: center;
     gap: 25px;
+    background: var(--bg-light);
+    padding: var(--spacing-unit);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-unit);
 }
 
 .mode-select label {
@@ -81,6 +89,10 @@ textarea:focus {
 
 .tone-select {
     margin: 0 0 25px 0;
+    background: var(--bg-light);
+    padding: var(--spacing-unit);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-unit);
 }
 
 .tone-select label {
@@ -267,6 +279,115 @@ button[type="submit"]:active {
 .high-contrast #mode-display {
     color: #63b3ed;  /* Light blue for better contrast */
     font-weight: 500;  /* Slightly bolder */
+}
+
+/* Improve form element focus states */
+textarea:focus,
+select:focus,
+button:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+/* Add visual grouping for options */
+.mode-select,
+.tone-select,
+.context-explanation {
+    background: var(--bg-light);
+    padding: var(--spacing-unit);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-unit);
+}
+
+/* Speech input button styling */
+.speech-input {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.9em;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: var(--spacing-unit);
+}
+
+.speech-input:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.speech-input:active {
+    transform: translateY(0);
+}
+
+/* High contrast mode for speech button */
+.high-contrast .speech-input {
+    background-color: #333;
+    border: 1px solid #555;
+}
+
+/* Input methods container */
+.input-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-unit);
+    margin-bottom: var(--spacing-unit);
+}
+
+/* Upload zone styling */
+.upload-zone {
+    border: 2px dashed var(--primary);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--bg-light);
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-zone:hover {
+    border-color: var(--primary-hover);
+    background: #fff;
+}
+
+.upload-zone.dragover {
+    border-color: var(--primary-hover);
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
+}
+
+.upload-content {
+    pointer-events: none;
+}
+
+.upload-content span[role="img"] {
+    font-size: 2em;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.upload-content p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+/* High contrast adjustments */
+.high-contrast .upload-zone {
+    border-color: #555;
+    background: #333;
+}
+
+.high-contrast .upload-zone:hover,
+.high-contrast .upload-zone.dragover {
+    border-color: #63b3ed;
+    background: #2d3748;
 }
 
 

@@ -15,3 +15,11 @@ __pycache__/
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+# Image processing
+*.png
+*.jpg
+*.jpeg
+*.gif
+uploads/
+temp/

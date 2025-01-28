@@ -2,8 +2,14 @@ from flask import Flask, request, render_template, jsonify
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+from PIL import Image
+import pytesseract
+import io
 
 load_dotenv()
+
+# Set Tesseract command path for Mac (installed via Homebrew)
+pytesseract.pytesseract.tesseract_cmd = '/opt/homebrew/bin/tesseract'
 
 app = Flask(__name__)
 
@@ -80,6 +86,34 @@ def index():
         return jsonify({"result": result})
 
     return render_template("index.html")
+
+@app.route("/process-image", methods=["POST"])
+def process_image():
+    if "image" not in request.files:
+        return jsonify({"error": "No image uploaded"})
+    
+    file = request.files["image"]
+    
+    try:
+        # Read the image using PIL
+        image = Image.open(io.BytesIO(file.read()))
+        
+        # Extract text from image
+        text = pytesseract.image_to_string(image, lang='eng')  # Specify English
+        
+        # Clean up the extracted text
+        text = text.strip()
+        
+        if not text:
+            return jsonify({"error": "No text could be extracted from the image"})
+        
+        return jsonify({"text": text})
+    
+    except Exception as e:
+        print(f"Error processing image: {str(e)}")
+        if "tesseract is not installed" in str(e):
+            return jsonify({"error": "OCR software is not properly configured"})
+        return jsonify({"error": "Error processing image"})
 
 if __name__ == "__main__":
     app.run(debug=True)
