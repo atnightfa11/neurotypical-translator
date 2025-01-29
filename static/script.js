@@ -5,14 +5,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const loading = document.getElementById("loading");
     const charCount = document.getElementById("char-count");
     const contrastToggle = document.querySelector(".contrast-toggle");
+    const submitButton = form.querySelector('button[type="submit"]');
 
     // Update character count
     input.addEventListener('input', function() {
-        const remaining = 500 - this.value.length;
-        charCount.textContent = `${this.value.length}/500 characters`;
+        const remaining = 1000 - this.value.length;
+        charCount.textContent = `${this.value.length}/1000 characters`;
         
         // Visual feedback when approaching limit
-        if (this.value.length > 400) {
+        if (this.value.length > 800) {
             charCount.style.color = '#ff4444';
         } else {
             charCount.style.color = '#666';
@@ -35,9 +36,30 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.contains('high-contrast'));
     });
 
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + Enter to submit
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            submitButton.click();
+        }
+        // Escape to clear input
+        if (e.key === 'Escape') {
+            input.value = '';
+            charCount.textContent = '0/1000 characters';
+        }
+    });
+
     // Form submission handler
-    document.getElementById("translator-form").addEventListener("submit", async function(e) {
-        e.preventDefault();  // Prevent default form submission
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        
+        // Disable submit button and show loading state
+        submitButton.disabled = true;
+        submitButton.innerHTML = `
+            <span class="loading-spinner"></span>
+            Translating...
+        `;
         
         const formData = new FormData(this);
         
@@ -64,6 +86,9 @@ document.addEventListener('DOMContentLoaded', function() {
             alert("An error occurred. Please try again.");
         } finally {
             loading.style.display = 'none';
+            // Reset submit button
+            submitButton.disabled = false;
+            submitButton.innerHTML = 'Translate';
         }
     });
 

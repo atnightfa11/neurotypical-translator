@@ -168,10 +168,27 @@ button[type="submit"]:active {
     text-align: left;
     line-height: 1.6;
     color: #333;
-    min-height: 50px;
+    min-height: 100px;
     margin-top: 20px;
     white-space: normal;
     word-wrap: break-word;
+}
+
+#result .analysis {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#result .analysis h3,
+#result .translation h3 {
+    color: var(--primary);
+    font-size: 1.1em;
+    margin: 0 0 10px 0;
+}
+
+#result .translation {
+    margin-top: 15px;
 }
 
 /* Responsive adjustments */
@@ -701,6 +718,49 @@ button,
 /* High contrast mode for character count */
 .high-contrast .character-count {
     color: var(--text-dark);
+}
+
+#result .analysis-content,
+#result .translation-content {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+#result .analysis-content {
+    position: relative;
+    padding-left: 20px;
+    border-left: 3px solid var(--primary);
+}
+
+#result .translation-content {
+    border-left: 3px solid #4CAF50;
+}
+
+/* Dark mode adjustments */
+.high-contrast #result .analysis-content,
+.high-contrast #result .translation-content {
+    background: var(--bg-dark-secondary);
+    border-color: var(--border-dark);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 

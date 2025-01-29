@@ -1,15 +1,26 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, send_from_directory
 from openai import OpenAI
+from openai import OpenAIError
 import os
 from dotenv import load_dotenv
 from PIL import Image
 import pytesseract
 import io
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_caching import Cache
+import re
+import html
 
 load_dotenv()
 
-# Get Tesseract path from environment or use default
-pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH', '/usr/bin/tesseract')
+# Set Tesseract path based on environment
+if os.path.exists('/opt/homebrew/bin/tesseract'):  # Mac with Homebrew
+    pytesseract.pytesseract.tesseract_cmd = '/opt/homebrew/bin/tesseract'
+elif os.path.exists('/usr/local/bin/tesseract'):  # Mac with alternative install
+    pytesseract.pytesseract.tesseract_cmd = '/usr/local/bin/tesseract'
+else:  # Default path
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 
 # Print debug info at startup
 print(f"Starting app with Tesseract path: {pytesseract.pytesseract.tesseract_cmd}")
@@ -26,10 +37,67 @@ app = Flask(__name__, static_url_path='/static', static_folder='static')
 # Initialize the client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# Initialize rate limiter
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+# Initialize cache
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+
+def sanitize_input(text):
+    """Sanitize user input"""
+    # Remove any HTML
+    text = html.escape(text)
+    # Remove any potential script injections
+    text = re.sub(r'<script.*?>.*?</script>', '', text, flags=re.DOTALL)
+    # Remove excessive whitespace
+    text = ' '.join(text.split())
+    return text
+
+def validate_and_format_response(text):
+    """Validate and format the response for better readability"""
+    try:
+        # Check for minimum content
+        if len(text.strip()) < 10:
+            return None, "Response too short"
+            
+        # Format sections
+        if "Analysis:" in text:
+            parts = text.split("Translation:", 1)
+            if len(parts) == 2:
+                analysis, translation = parts
+                # Clean up the sections
+                analysis = analysis.replace('Analysis:', '').strip()
+                translation = translation.strip()
+                
+                # Format with clear separation
+                formatted = f"""<div class="analysis">
+                    <h3>Analysis</h3>
+                    <div class="analysis-content">
+                        {analysis}
+                    </div>
+                </div>
+                <div class="translation">
+                    <h3>Translation</h3>
+                    <div class="translation-content">
+                        {translation}
+                    </div>
+                </div>"""
+                return formatted, None
+                
+        return text, None
+    except Exception as e:
+        return None, str(e)
+
 @app.route("/", methods=["GET", "POST"])
+@limiter.limit("30 per minute")
 def index():
     if request.method == "POST":
         input_text = request.form.get("input_text")
+        input_text = sanitize_input(input_text)
         translation_mode = request.form.get("mode")
         tone = request.form.get("tone", "neutral").lower()
         explain_context = request.form.get("explain_context", "no").lower()
@@ -44,39 +112,58 @@ def index():
         if not input_text:
             return jsonify({"error": "Please enter some text."})
 
+        # Check character count
+        if len(input_text) > 1000:
+            return jsonify({"error": "Text exceeds 1000 characters. Please shorten your message."})
+
         # Start building prompt
         prompt = ""
 
         # 1) Add explanation only if requested
         if explain_context == "yes":
             prompt += (
-                "Explain the overall intent and social context of this phrase, especially how it might be "
-                "interpreted by someone neurodivergent vs. neurotypical. If there are any implied social "
-                "norms or hidden expectations, please mention them:\n\n"
+                "Analysis:\n"
+                "Analyze this communication, focusing on:\n"
+                "- What appears to be optional but is actually a requirement\n"
+                "- Hidden social expectations or implied meanings\n"
+                "- How politeness masks the actual request\n\n"
                 f"{input_text}\n\n"
-                "After explaining, please translate.\n\n"
+                "\nTranslation:\n"
             )
 
         # 2) Translation Mode
         if translation_mode == "nt-to-nd":
             prompt += (
-                "Now, translate this phrase from Neurotypical to Neurodivergent communication style. "
-                "Remove indirect or optional phrasings, and make it straightforward and clear.\n\n"
+                "Convert this neurotypical communication into clear, direct instructions:\n\n"
+                "Rules:\n"
+                "- Remove indirect language and implied meanings\n"
+                "- Convert polite suggestions into direct statements\n"
+                "- Make all requirements explicit, even if originally phrased as optional\n"
+                "- Use specific times/dates instead of vague timeframes\n"
+                "- Remove unnecessary social cushioning\n"
+                "- Keep only essential information\n\n"
                 f"Phrase: {input_text}\n\n"
             )
         elif translation_mode == "nd-to-nt":
             prompt += (
-                "Now, translate this phrase from Neurodivergent to Neurotypical communication style. "
-                "You can add gentle or indirect language if needed, but keep it respectful.\n\n"
+                "Translate this from Neurodivergent to Neurotypical communication style:\n\n"
+                "- Add appropriate social cushioning\n"
+                "- Include context where helpful\n"
+                "- Maintain the core message while adjusting tone\n"
+                "- Keep directness when needed for clarity\n"
+                "- Balance honesty with social expectations\n"
+                "- Add appropriate transitions and softeners\n"
+                "- Include relevant emotional context\n"
+                "- Preserve important specific details\n\n"
                 f"Phrase: {input_text}\n\n"
             )
 
         # 3) Tone instructions
         tone_prompts = {
-            "neutral": "Try to keep the result neutral and polite.",
-            "formal": "Make the result formal and professional.",
-            "casual": "Use a relaxed, friendly style.",
-            "empathetic": "Use an empathetic tone, focusing on support and understanding."
+            "neutral": "Keep the tone balanced and clear, focusing on factual communication while maintaining respect.",
+            "formal": "Use professional language appropriate for work or academic settings, with clear structure and proper etiquette.",
+            "casual": "Use a friendly, conversational tone while maintaining clarity and respect.",
+            "empathetic": "Emphasize understanding and emotional awareness, acknowledge feelings, and show support."
         }
         prompt += tone_prompts.get(tone, tone_prompts["neutral"])
 
@@ -86,14 +173,33 @@ def index():
             "Real communication styles can vary widely."
         )
 
-        response = client.completions.create(
-            model="gpt-3.5-turbo-instruct",  # or whichever model you use
-            prompt=prompt,
-            max_tokens=300
-        )
+        try:
+            response = client.completions.create(
+                model="gpt-3.5-turbo-instruct",
+                prompt=prompt,
+                max_tokens=300,
+                temperature=0.7,
+                presence_penalty=0.6
+            )
 
-        result = response.choices[0].text.strip()
-        return jsonify({"result": result})
+            result = response.choices[0].text.strip()
+            formatted_result, error = validate_and_format_response(result)
+            
+            if formatted_result:
+                # Cache the result
+                cache_key = f"{input_text}:{translation_mode}:{tone}:{explain_context}"
+                cache.set(cache_key, formatted_result, timeout=3600)
+                
+                return jsonify({"result": formatted_result})
+            else:
+                return jsonify({"error": error})
+            
+        except OpenAIError as e:
+            print(f"OpenAI API error: {str(e)}")
+            return jsonify({"error": "Translation service temporarily unavailable. Please try again in a moment."})
+        except Exception as e:
+            print(f"Unexpected error: {str(e)}")
+            return jsonify({"error": "An unexpected error occurred. Please try again."})
 
     return render_template("index.html")
 
@@ -127,6 +233,15 @@ def process_image():
     except Exception as e:
         print(f"Error processing image: {str(e)}")
         return jsonify({"error": f"Error processing image: {str(e)}"})
+
+@app.route("/static/social-preview.png")
+def social_preview():
+    return send_from_directory('static', 'social-preview.png')
+
+@app.route("/apple-touch-icon.png")
+@app.route("/apple-touch-icon-precomposed.png")
+def apple_touch_icon():
+    return send_from_directory('static', 'favicon.ico')
 
 if __name__ == "__main__":
     app.run(debug=True)
