@@ -5,9 +5,12 @@ services:
     buildCommand: |
       # Install system dependencies
       apt-get update -y
-      apt-get install -y tesseract-ocr
+      apt-get install -y tesseract-ocr tesseract-ocr-eng
+      export PATH=$PATH:/usr/bin/tesseract
       pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.0 
+        value: 3.9.0
+      - key: PATH
+        value: /usr/bin:/usr/local/bin:/usr/bin/tesseract 
