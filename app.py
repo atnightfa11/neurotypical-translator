@@ -104,22 +104,17 @@ def process_image():
     
     file = request.files["image"]
     
-    # Debug: Print Tesseract path
-    print(f"Tesseract path: {pytesseract.pytesseract.tesseract_cmd}")
-    
     try:
         # Read the image using PIL
         image = Image.open(io.BytesIO(file.read()))
         
-        # Debug: Check if tesseract is installed
-        try:
-            import subprocess
-            subprocess.run(['tesseract', '--version'], capture_output=True, text=True)
-        except Exception as e:
-            print(f"Tesseract check error: {str(e)}")
+        # Use full path for tesseract check
+        tesseract_path = pytesseract.pytesseract.tesseract_cmd
+        if not os.path.exists(tesseract_path):
+            return jsonify({"error": "OCR software not found. Please try again later."})
         
         # Extract text from image
-        text = pytesseract.image_to_string(image, lang='eng')  # Specify English
+        text = pytesseract.image_to_string(image, lang='eng')
         
         # Clean up the extracted text
         text = text.strip()
