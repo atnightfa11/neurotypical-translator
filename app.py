@@ -123,10 +123,10 @@ def index():
         if explain_context == "yes":
             prompt += (
                 "Analysis:\n"
-                "Analyze this communication, focusing on:\n"
-                "- What appears to be optional but is actually a requirement\n"
-                "- Hidden social expectations or implied meanings\n"
-                "- How politeness masks the actual request\n\n"
+                "This is a neurotypical phrase that contains:\n"
+                "1. A polite suggestion that is actually a requirement\n"
+                "2. Social expectations hidden behind optional-sounding language\n"
+                "3. The real meaning behind the polite phrasing\n\n"
                 f"{input_text}\n\n"
                 "\nTranslation:\n"
             )
@@ -134,14 +134,14 @@ def index():
         # 2) Translation Mode
         if translation_mode == "nt-to-nd":
             prompt += (
-                "Convert this neurotypical communication into clear, direct instructions:\n\n"
-                "Rules:\n"
-                "- Remove indirect language and implied meanings\n"
-                "- Convert polite suggestions into direct statements\n"
-                "- Make all requirements explicit, even if originally phrased as optional\n"
-                "- Use specific times/dates instead of vague timeframes\n"
-                "- Remove unnecessary social cushioning\n"
-                "- Keep only essential information\n\n"
+                "Convert this into a clear instruction by:\n"
+                "1. Removing ALL optional language ('if you want', 'when you can', etc)\n"
+                "2. Making it a direct command\n"
+                "3. Specifying exact requirements\n"
+                "4. Using the shortest possible clear statement\n\n"
+                "Example:\n"
+                "NT: 'If you could possibly get that report to me whenever you have a chance...'\n"
+                "ND: 'Submit the report by 5pm today.'\n\n"
                 f"Phrase: {input_text}\n\n"
             )
         elif translation_mode == "nd-to-nt":
