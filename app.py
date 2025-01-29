@@ -8,8 +8,18 @@ import io
 
 load_dotenv()
 
-# Default Tesseract path for Linux/Render
-pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+# Get Tesseract path from environment or use default
+pytesseract.pytesseract.tesseract_cmd = os.getenv('TESSERACT_PATH', '/usr/bin/tesseract')
+
+# Print debug info at startup
+print(f"Starting app with Tesseract path: {pytesseract.pytesseract.tesseract_cmd}")
+try:
+    import subprocess
+    result = subprocess.run([pytesseract.pytesseract.tesseract_cmd, '--version'], 
+                          capture_output=True, text=True)
+    print(f"Tesseract version: {result.stdout}")
+except Exception as e:
+    print(f"Failed to get Tesseract version: {str(e)}")
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 

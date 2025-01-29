@@ -6,11 +6,14 @@ services:
       # Install system dependencies
       apt-get update -y
       apt-get install -y tesseract-ocr tesseract-ocr-eng
-      export PATH=$PATH:/usr/bin/tesseract
+      # Verify installation and permissions
+      which tesseract
+      ls -l /usr/bin/tesseract
+      # Install Python requirements
       pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
-      - key: PATH
-        value: /usr/bin:/usr/local/bin:/usr/bin/tesseract 
+      - key: TESSERACT_PATH
+        value: /usr/bin/tesseract 
