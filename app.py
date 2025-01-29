@@ -97,9 +97,19 @@ def process_image():
     
     file = request.files["image"]
     
+    # Debug: Print Tesseract path
+    print(f"Tesseract path: {pytesseract.pytesseract.tesseract_cmd}")
+    
     try:
         # Read the image using PIL
         image = Image.open(io.BytesIO(file.read()))
+        
+        # Debug: Check if tesseract is installed
+        try:
+            import subprocess
+            subprocess.run(['tesseract', '--version'], capture_output=True, text=True)
+        except Exception as e:
+            print(f"Tesseract check error: {str(e)}")
         
         # Extract text from image
         text = pytesseract.image_to_string(image, lang='eng')  # Specify English
@@ -114,9 +124,7 @@ def process_image():
     
     except Exception as e:
         print(f"Error processing image: {str(e)}")
-        if "tesseract is not installed" in str(e):
-            return jsonify({"error": "OCR software is not properly configured"})
-        return jsonify({"error": "Error processing image"})
+        return jsonify({"error": f"Error processing image: {str(e)}"})
 
 if __name__ == "__main__":
     app.run(debug=True)
