@@ -6,17 +6,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const charCount = document.getElementById("char-count");
     const contrastToggle = document.querySelector(".contrast-toggle");
     const submitButton = form.querySelector('button[type="submit"]');
-  
+    
     // Update character count
     input.addEventListener('input', function() {
       charCount.textContent = `${this.value.length}/1000 characters`;
-      if (this.value.length > 800) {
-        charCount.style.color = '#ff4444';
-      } else {
-        charCount.style.color = '#666';
-      }
+      charCount.style.color = this.value.length > 800 ? '#ff4444' : '#666';
     });
-  
+    
     // Update mode display
     document.querySelectorAll('input[name="mode"]').forEach(radio => {
       radio.addEventListener('change', function() {
@@ -25,20 +21,17 @@ document.addEventListener('DOMContentLoaded', function() {
           : 'Neurodivergent to Neurotypical';
       });
     });
-  
-    // High contrast mode toggle
+    
+    // Dark mode toggle function - now toggles both "high-contrast" and "dark"
     function toggleDarkMode() {
       const html = document.documentElement;
       html.classList.toggle('high-contrast');
-      const isHighContrast = html.classList.contains('high-contrast');
-      
-      // Save preference
-      localStorage.setItem('highContrast', isHighContrast);
+      html.classList.toggle('dark');
+      localStorage.setItem('highContrast', html.classList.contains('high-contrast'));
     }
     
-    // Add click handler
     contrastToggle.addEventListener('click', toggleDarkMode);
-  
+    
     // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -50,72 +43,86 @@ document.addEventListener('DOMContentLoaded', function() {
         charCount.textContent = '0/1000 characters';
       }
     });
-  
+    
+    // Function to show toast notifications
+    function showNotification(message, type) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+    
     // Form submission handler
     form.addEventListener("submit", async function(e) {
       e.preventDefault();
-      
       submitButton.disabled = true;
-      submitButton.innerHTML = `
-        <span class="loading-spinner"></span>
-        Translating...
-      `;
-      
+      submitButton.innerHTML = `<span class="loading-spinner"></span> Translating...`;
+    
       const formData = new FormData(this);
-      
+    
       try {
         loading.style.display = 'block';
-        
         const response = await fetch("/", {
           method: "POST",
           body: formData
         });
-        
+    
         const result = await response.json();
         if (result.error) {
-          alert(result.error);
+          showNotification(result.error, "error");
         } else {
           const resultDiv = document.getElementById("result");
           const formatted = result.result
             .replace(/\n{2,}/g, '<br><br>')
             .replace(/\n/g, '<br>');
           resultDiv.innerHTML = formatted;
+    
+          // Create and append the Copy to Clipboard button
+          const copyButton = document.createElement('button');
+          copyButton.className = 'copy-btn';
+          copyButton.textContent = 'Copy to Clipboard';
+          copyButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(resultDiv.innerText)
+              .then(() => showNotification("Copied to clipboard!", "success"))
+              .catch(() => showNotification("Copy failed", "error"));
+          });
+          resultDiv.appendChild(copyButton);
+    
           resultDiv.scrollIntoView({ behavior: 'smooth' });
         }
       } catch (error) {
-        alert("An error occurred. Please try again.");
+        showNotification("An error occurred. Please try again.", "error");
       } finally {
         loading.style.display = 'none';
         submitButton.disabled = false;
         submitButton.innerHTML = 'Translate';
       }
     });
-  
-    // Restore high contrast preference
+    
+    // Restore dark mode preference on page load
     function restoreDarkModePreference() {
       if (localStorage.getItem('highContrast') === 'true') {
         document.documentElement.classList.add('high-contrast');
+        document.documentElement.classList.add('dark');
       }
     }
+    restoreDarkModePreference();
     
-    // Apply dark mode preference on page load
-    document.addEventListener('DOMContentLoaded', restoreDarkModePreference);
-  
     // Initialize speech recognition
     const speakButton = document.getElementById('speak-button');
     const uploadButton = document.getElementById('upload-button');
     const fileInput = document.getElementById('file-input');
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.lang = 'en-US';
-      
+    
       let isRecording = false;
-      
       speakButton.onclick = function() {
         if (isRecording) {
           recognition.stop();
@@ -134,14 +141,14 @@ document.addEventListener('DOMContentLoaded', function() {
               </svg>
               <span>Recording...</span>`;
           } catch (err) {
-            showError('Failed to start recording. Please try again.', speakButton);
+            showNotification('Failed to start recording. Please try again.', "error");
             isRecording = false;
             return;
           }
         }
         isRecording = !isRecording;
       };
-      
+    
       recognition.onresult = function(event) {
         const textarea = document.getElementById('input-text');
         if (event.results[0][0]) {
@@ -157,8 +164,8 @@ document.addEventListener('DOMContentLoaded', function() {
       speakButton.style.display = 'none';
       console.log('Speech recognition is not supported in this browser');
     }
-  
-    // Error handling helper
+    
+    // Error handling helper (used if speech recognition fails)
     function showError(message, element) {
       const errorDiv = document.createElement('div');
       errorDiv.className = 'error-message visible';
@@ -166,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
       element.parentNode.insertBefore(errorDiv, element.nextSibling);
       setTimeout(() => errorDiv.remove(), 5000);
     }
-  
+    
     // Handle file upload
     uploadButton.onclick = () => fileInput.click();
     
@@ -175,27 +182,25 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadButton.classList.add('loading');
         const formData = new FormData();
         formData.append('image', this.files[0]);
-        
         try {
           loading.style.display = 'block';
           const response = await fetch('/process-image', {
             method: 'POST',
             body: formData
           });
-          
           const result = await response.json();
           if (result.error) {
-            showError(result.error, fileInput);
+            showNotification(result.error, "error");
           } else {
             document.getElementById('input-text').value = result.text;
             document.getElementById('input-text').dispatchEvent(new Event('input'));
           }
         } catch (error) {
-          showError('Error processing image. Please try again.', fileInput);
+          showNotification('Error processing image. Please try again.', "error");
         } finally {
           loading.style.display = 'none';
           uploadButton.classList.remove('loading');
         }
       }
     };
-  });
+  });  

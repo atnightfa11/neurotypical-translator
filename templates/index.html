@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A tool to help neurotypical & neurodivergent individuals communicate more effectively. Translate between communication styles with context explanations.">
-  <meta name="keywords" content="neurodivergent translator, communication translator, autism communication tool, ADHD communication helper, social communication aid">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://neurotypicaltranslator.com">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A tool to help neurotypical & neurodivergent individuals communicate more effectively. Translate between communication styles with context explanations." />
+  <meta name="keywords" content="neurodivergent translator, communication translator, autism communication tool, ADHD communication helper, social communication aid" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://neurotypicaltranslator.com" />
   
   <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://neurotypicaltranslator.com/">
-  <meta property="og:title" content="Neurotypical Translator - Bridge Communication Styles">
-  <meta property="og:description" content="Translate between neurotypical and neurodivergent communication styles with context explanations.">
-  <meta property="og:image" content="/static/social-preview.png">
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://neurotypicaltranslator.com/" />
+  <meta property="og:title" content="Neurotypical Translator - Bridge Communication Styles" />
+  <meta property="og:description" content="Translate between neurotypical and neurodivergent communication styles with context explanations." />
+  <meta property="og:image" content="/static/social-preview.png" />
   
   <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://neurotypicaltranslator.com/">
-  <meta name="twitter:title" content="Neurotypical Translator">
-  <meta name="twitter:description" content="Bridge the communication gap between neurotypical and neurodivergent styles.">
-  <meta name="twitter:image" content="/static/social-preview.png">
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://neurotypicaltranslator.com/" />
+  <meta name="twitter:title" content="Neurotypical Translator" />
+  <meta name="twitter:description" content="Bridge the communication gap between neurotypical and neurodivergent styles." />
+  <meta name="twitter:image" content="/static/social-preview.png" />
   
   <title>Neurotypical Translator</title>
   
@@ -44,49 +44,46 @@
     }
   </script>
   
-  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-  <link rel="stylesheet" href="/static/style.css?v=1">
-  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+  <link rel="stylesheet" href="/static/style.css?v=1" />
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
   
   <script defer data-domain="neurotypicaltranslator.com" src="https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"></script>
   <script>
-    window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }
+    window.plausible = window.plausible || function() {
+      (window.plausible.q = window.plausible.q || []).push(arguments);
+    }
   </script>
 </head>
 <body>
+  <!-- Toast Notification Container -->
+  <div id="toast"></div>
+  
   <div class="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg dark:bg-gray-800">
-    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Neurotypical Translator</h1>
-    <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">This tool helps neurotypical & neurodivergent individuals communicate.</p>
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-300 mb-4">
+      Neurotypical Translator
+    </h1>
+    <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
+      This tool helps neurotypical &amp; neurodivergent individuals communicate.
+    </p>
     <form id="translator-form" class="space-y-6">
       <div class="mode-select form-element">
         <label class="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300">
-          <input type="radio" name="mode" value="nt-to-nd" checked> Neurotypical → Neurodivergent
+          <input type="radio" name="mode" value="nt-to-nd" checked /> Neurotypical → Neurodivergent
         </label>
         <label class="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300">
-          <input type="radio" name="mode" value="nd-to-nt"> Neurodivergent → Neurotypical
+          <input type="radio" name="mode" value="nd-to-nt" /> Neurodivergent → Neurotypical
         </label>
       </div>
       <div class="input-area form-element">
         <div class="input-actions mb-2">
-          <button type="button" 
-            class="inline-flex items-center px-4 py-2 text-sm font-medium 
-                   text-gray-700 bg-white border border-gray-300 rounded-md 
-                   hover:bg-gray-50 focus:outline-none focus:ring-2 
-                   focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 
-                   dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
-            id="upload-button">
+          <button type="button" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700" id="upload-button">
             <svg viewBox="0 0 24 24" width="16" height="16">
               <path fill="currentColor" d="M19 7v2.99s-1.99.01-2 0V7h-3s.01-1.99 0-2h3V2h2v3h3v2h-3zm-3 4V8h-3V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8h-3zM5 19l3-4 2 3 3-4 4 5H5z"/>
             </svg>
             <span class="ml-2">Upload</span>
           </button>
-          <button type="button"
-            class="ml-2 inline-flex items-center px-4 py-2 text-sm font-medium 
-                   text-gray-700 bg-white border border-gray-300 rounded-md 
-                   hover:bg-gray-50 focus:outline-none focus:ring-2 
-                   focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 
-                   dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
-            id="speak-button">
+          <button type="button" class="ml-2 inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700" id="speak-button">
             <svg viewBox="0 0 24 24" width="16" height="16">
               <path fill="currentColor" d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
               <path fill="currentColor" d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
@@ -94,28 +91,14 @@
             <span class="ml-2">Speak</span>
           </button>
         </div>
-        <textarea 
-          name="input_text" 
-          id="input-text" 
-          placeholder="Enter your text here..." 
-          aria-label="Text to translate" 
-          maxlength="1000"
-          class="w-full px-4 py-3 rounded-lg border border-gray-300 
-                 focus:ring-2 focus:ring-primary focus:border-primary 
-                 dark:bg-gray-700 dark:border-gray-600 dark:text-white 
-                 transition duration-150 ease-in-out">
-        </textarea>
+        <textarea name="input_text" id="input-text" placeholder="Enter your text here..." aria-label="Text to translate" maxlength="1000" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-primary dark:bg-gray-700 dark:border-gray-600 dark:text-white transition duration-150 ease-in-out"></textarea>
         <div class="text-sm text-gray-500 mt-2" id="char-count">0/1000 characters</div>
       </div>
       <div class="tone-select form-element">
         <label for="tone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Select Tone:
         </label>
-        <select id="tone" name="tone" 
-          class="block w-full px-3 py-2 text-base border-gray-300 
-                 focus:outline-none focus:ring-primary focus:border-primary 
-                 rounded-md dark:bg-gray-700 dark:border-gray-600 
-                 dark:text-white">
+        <select id="tone" name="tone" class="block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
           <option value="neutral" selected>Neutral: Clear and polite communication</option>
           <option value="formal">Formal: Professional and respectful language</option>
           <option value="casual">Casual: Relaxed and friendly communication</option>
@@ -124,23 +107,17 @@
       </div>
       <div class="context-explanation form-element">
         <label class="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300">
-          <input type="checkbox" name="explain_context" id="explain-context" value="yes" checked>
+          <input type="checkbox" name="explain_context" id="explain-context" value="yes" checked />
           <span>Explain the context before translating</span>
         </label>
       </div>
       <div class="submit-container form-element">
-        <button type="submit" 
-          class="w-full sm:w-auto px-6 py-3 bg-primary text-white font-medium 
-                 rounded-lg hover:bg-primary-dark focus:outline-none 
-                 focus:ring-2 focus:ring-offset-2 focus:ring-primary 
-                 transition duration-150 ease-in-out">
+        <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150 ease-in-out">
           Translate
         </button>
       </div>
     </form>
-    <div id="result" class="mt-8 p-6 bg-white rounded-lg shadow-sm 
-                             border border-gray-200 dark:bg-gray-800 
-                             dark:border-gray-700"></div>
+    <div id="result" class="mt-8 p-6 bg-white rounded-lg shadow-sm border border-gray-200 dark:bg-gray-800 dark:border-gray-700"></div>
     <button class="contrast-toggle" title="Toggle high contrast mode">
       <span role="img" aria-label="contrast">🌓</span>
     </button>
@@ -152,16 +129,16 @@
     </div>
     <div class="disclaimer">
       <p>
-        Note: This tool assists with communication but isn't a one-size-fits-all solution. 
-        Communication styles vary among individuals, whether neurotypical or neurodivergent. 
-        It can help with social media posts, emails, and general communication, but always trust your 
-        judgment and personal communication preferences.
+        Note: This tool assists with communication but isn't a one-size-fits-all solution.
+        Communication styles vary among individuals, whether neurotypical or neurodivergent.
+        It can help with social media posts, emails, and general communication, but always trust your judgment and personal communication preferences.
       </p>
     </div>
   </div>
   
   <!-- Hidden file input for image upload -->
   <input type="file" id="file-input" class="hidden" aria-label="File upload" />
+  
   <script src="/static/script.js?v=1"></script>
 </body>
 </html>

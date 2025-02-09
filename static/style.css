@@ -300,8 +300,40 @@
     cursor: pointer;
   }
   
+  /* === Toast Notifications === */
+  #toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--primary);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    z-index: 1000;
+  }
+  #toast.show {
+    opacity: 1;
+  }
+  
+  /* === Copy Button === */
+  .copy-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-top: 10px;
+    transition: background 0.2s ease;
+  }
+  .copy-btn:hover {
+    background: var(--primary-hover);
+  }
+  
   /* === Dark Mode (High Contrast) === */
-  /* Base dark mode styles for html and body */
   html.high-contrast,
   html.high-contrast body {
     background: #1a202c !important;
@@ -309,7 +341,6 @@
     color: #e0e0e0 !important;
   }
   
-  /* Container and main elements */
   html.high-contrast .container {
     background: #2d3748;
     color: #e0e0e0;
@@ -317,7 +348,6 @@
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
   }
   
-  /* Typography */
   html.high-contrast h1 {
     color: #e0e0e0;
   }
@@ -326,7 +356,6 @@
     color: #a0aec0;
   }
   
-  /* Form elements */
   html.high-contrast textarea,
   html.high-contrast select,
   html.high-contrast button {
@@ -339,7 +368,6 @@
     background: #374151;
   }
   
-  /* Mode and tone selectors */
   html.high-contrast .mode-select,
   html.high-contrast .tone-select,
   html.high-contrast .context-explanation {
@@ -352,7 +380,6 @@
     color: #e0e0e0;
   }
   
-  /* Results area */
   html.high-contrast #result {
     background-color: #2d3748;
     border-color: #4a5568;
@@ -364,7 +391,6 @@
     border-color: #4a5568;
   }
   
-  /* Utility elements */
   html.high-contrast .character-count {
     color: #9ca3af;
   }
