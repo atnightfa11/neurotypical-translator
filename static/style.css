@@ -15,9 +15,9 @@
     --border-dark: #404040;
     /* Transition speeds */
     --transition-speed: 0.3s;
-}
-
-body {
+  }
+  
+  body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background: linear-gradient(135deg, #f0f2f5 0%, #ffffff 100%);
     margin: 0;
@@ -28,9 +28,9 @@ body {
     min-height: 100vh;
     transition: background-color var(--transition-speed) ease,
                 color var(--transition-speed) ease;
-}
-
-.container {
+  }
+  
+  .container {
     text-align: center;
     width: 90%;
     max-width: var(--max-width);
@@ -42,26 +42,26 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.1);
     transition: background-color var(--transition-speed) ease,
                 box-shadow var(--transition-speed) ease;
-}
-
-h1 {
+  }
+  
+  h1 {
     margin: 0 0 10px 0;
     color: #1a1a1a;
     font-size: 2.2em;
-}
-
-.description {
+  }
+  
+  .description {
     font-size: 1em;
     color: #666;
     margin: 0 0 25px 0;
     line-height: 1.4;
-}
-
-.input-area {
+  }
+  
+  .input-area {
     position: relative;
-}
-
-textarea {
+  }
+  
+  textarea {
     width: 100%;
     box-sizing: border-box;
     height: 120px;
@@ -73,24 +73,24 @@ textarea {
     line-height: 1.5;
     resize: vertical;
     background: white;
-}
-
-textarea:focus {
+  }
+  
+  textarea:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
-}
-
-/* Common container width for all elements */
-.form-element {
+  }
+  
+  /* Common container width for all elements */
+  .form-element {
     width: 100%;
     max-width: 650px;
     margin: 0 auto 20px;
     border-radius: var(--border-radius);
     box-sizing: border-box;
-}
-
-.mode-select {
+  }
+  
+  .mode-select {
     padding: 15px;
     background: white;
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -98,26 +98,26 @@ textarea:focus {
     display: flex;
     justify-content: center;
     gap: 25px;
-}
-
-.mode-select label {
+  }
+  
+  .mode-select label {
     font-weight: 500;
     color: var(--text-primary);
-}
-
-.tone-select {
+  }
+  
+  .tone-select {
     background: var(--bg-light);
     padding: 15px;
-}
-
-.tone-select label {
+  }
+  
+  .tone-select label {
     display: block;
     margin-bottom: 6px;
     color: #444;
     font-size: 0.9em;
-}
-
-.tone-select select {
+  }
+  
+  .tone-select select {
     width: 100%;
     padding: 8px;
     font-size: 0.95em;
@@ -125,17 +125,15 @@ textarea:focus {
     border: 1px solid #ddd;
     background-color: white;
     cursor: pointer;
-    color: #333;
-    background-image: url("data:image/svg+xml,...");
-}
-
-.tone-select select:focus {
+  }
+  
+  .tone-select select:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
-}
-
-button[type="submit"] {
+  }
+  
+  button[type="submit"] {
     background-color: var(--primary);
     color: white;
     border: none;
@@ -146,20 +144,20 @@ button[type="submit"] {
     cursor: pointer;
     transition: all 0.2s ease;
     min-width: 160px;
-}
-
-button[type="submit"]:hover {
+  }
+  
+  button[type="submit"]:hover {
     background-color: var(--primary-hover);
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-button[type="submit"]:active {
+  }
+  
+  button[type="submit"]:active {
     transform: translateY(0);
-}
-
-#result {
-    margin-top: 25px;
+  }
+  
+  #result {
+    margin-top: 20px;
     padding: 15px;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
@@ -169,98 +167,96 @@ button[type="submit"]:active {
     line-height: 1.6;
     color: #333;
     min-height: 100px;
-    margin-top: 20px;
     white-space: normal;
     word-wrap: break-word;
-}
-
-#result .analysis {
+  }
+  
+  #result .analysis {
     margin-bottom: 20px;
     padding-bottom: 15px;
     border-bottom: 1px solid #e0e0e0;
-}
-
-#result .analysis h3,
-#result .translation h3 {
+  }
+  
+  #result .analysis h3,
+  #result .translation h3 {
     color: var(--primary);
     font-size: 1.1em;
     margin: 0 0 10px 0;
-}
-
-#result .translation {
+  }
+  
+  #result .translation {
     margin-top: 15px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 600px) {
     body {
-        padding: 15px;
+      padding: 15px;
     }
     
     .container {
-        padding: 20px;
-        margin: 10px;
-        width: calc(100% - 20px);
+      padding: 20px;
+      margin: 10px;
+      width: calc(100% - 20px);
     }
     
     .mode-select {
-        flex-direction: column;
-        gap: 12px;
-        padding: 10px;
+      flex-direction: column;
+      gap: 12px;
+      padding: 10px;
     }
     
     h1 {
-        font-size: 1.8em;
+      font-size: 1.8em;
     }
     
     textarea {
-        height: 150px;  /* Slightly taller on mobile */
+      height: 150px;
     }
     
     .input-actions {
-        position: static;
-        margin: 8px 0;
-        justify-content: flex-end;
+      position: static;
+      margin: 8px 0;
+      justify-content: flex-end;
     }
     
     .action-button {
-        padding: 8px 12px;  /* Larger touch target */
+      padding: 8px 12px;
     }
     
     .tone-select select {
-        font-size: 16px;  /* Prevent zoom on mobile */
-        padding: 10px;    /* Larger touch target */
+      font-size: 16px;
+      padding: 10px;
     }
     
-    /* Improve spacing on mobile */
     .form-element,
     .mode-select,
     .tone-select,
     .context-explanation {
-        margin-bottom: 15px;
-        padding: 12px;
+      margin-bottom: 15px;
+      padding: 12px;
     }
-}
-
-/* Add these to your existing CSS */
-.current-mode {
+  }
+  
+  /* Mode display */
+  .current-mode {
     background-color: #f0f7ff;
     padding: 10px;
     border-radius: 8px;
     margin: 15px 0;
     font-size: 0.9em;
     color: #0056b3;
-}
-
-.loading {
+  }
+  
+  .loading {
     display: none;
     color: #666;
     margin: 10px 0;
     position: relative;
     padding-left: 24px;
-}
-
-.loading::before {
+  }
+  
+  .loading::before {
     content: '';
     position: absolute;
     left: 0;
@@ -272,23 +268,23 @@ button[type="submit"]:active {
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
+  }
+  
+  @keyframes spin {
     to { transform: rotate(360deg); }
-}
-
-.character-count {
+  }
+  
+  .character-count {
     color: #666;
     font-size: 0.8em;
     text-align: left;
     margin-top: -15px;
     margin-bottom: 15px;
     padding-left: 2px;
-}
-
-/* High contrast mode toggle */
-.contrast-toggle {
+  }
+  
+  /* High contrast mode toggle */
+  .contrast-toggle {
     position: absolute;
     top: 20px;
     right: 20px;
@@ -297,470 +293,78 @@ button[type="submit"]:active {
     border: 1px solid #ddd;
     background: white;
     cursor: pointer;
-}
-
-/* High contrast theme */
-.high-contrast {
-    background-color: var(--bg-dark-primary);
-    color: #fff;
-}
-
-.high-contrast .container {
-    background: var(--bg-dark-secondary);
-    color: var(--text-dark);
-    border-color: var(--border-dark);
-}
-
-.high-contrast textarea,
-.high-contrast select {
-    background: #333;
-    color: #fff;
-    border-color: #555;
-}
-
-/* High contrast theme improvements */
-.high-contrast h1,
-.high-contrast .description,
-.high-contrast #result {
-    color: #fff;
-}
-
-.high-contrast #result {
-    background-color: #333;
-    border-color: #555;
-}
-
-.high-contrast .contrast-toggle {
-    background: #333;
-    border-color: #555;
-}
-
-.high-contrast #mode-display {
-    color: #fff;
-}
-
-.disclaimer {
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #ddd;
-    font-size: 0.85em;
-    color: #666;
-    line-height: 1.5;
-}
-
-.high-contrast .disclaimer {
+  }
+  
+  /* === Dark Mode (High Contrast) === */
+  /* Base dark mode styles for html and body */
+  html.high-contrast,
+  html.high-contrast body {
+    background: #1a202c !important;
+    background-image: none !important;
+    color: #e0e0e0 !important;
+  }
+  
+  /* Container and main elements */
+  html.high-contrast .container {
+    background: #2d3748;
+    color: #e0e0e0;
+    border-color: #4a5568;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Typography */
+  html.high-contrast h1 {
+    color: #e0e0e0;
+  }
+  
+  html.high-contrast .description {
+    color: #a0aec0;
+  }
+  
+  /* Form elements */
+  html.high-contrast textarea,
+  html.high-contrast select,
+  html.high-contrast button {
+    background: #1a202c;
+    color: #e0e0e0;
+    border-color: #4a5568;
+  }
+  
+  html.high-contrast button:hover {
+    background: #374151;
+  }
+  
+  /* Mode and tone selectors */
+  html.high-contrast .mode-select,
+  html.high-contrast .tone-select,
+  html.high-contrast .context-explanation {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+  
+  html.high-contrast .mode-select label,
+  html.high-contrast .tone-select label {
+    color: #e0e0e0;
+  }
+  
+  /* Results area */
+  html.high-contrast #result {
+    background-color: #2d3748;
+    border-color: #4a5568;
+  }
+  
+  html.high-contrast #result .analysis-content,
+  html.high-contrast #result .translation-content {
+    background: #1a202c;
+    border-color: #4a5568;
+  }
+  
+  /* Utility elements */
+  html.high-contrast .character-count {
+    color: #9ca3af;
+  }
+  
+  html.high-contrast .disclaimer {
     color: #aaa;
     border-top-color: #444;
-}
-
-/* Mode display specific dark mode styling */
-.high-contrast .current-mode {
-    background-color: #2d3748;  /* Darker background */
-    color: #e2e8f0;  /* Light gray text */
-    border: 1px solid #4a5568;  /* Subtle border */
-}
-
-.high-contrast #mode-display {
-    color: #63b3ed;  /* Light blue for better contrast */
-    font-weight: 500;  /* Slightly bolder */
-}
-
-/* Improve form element focus states */
-textarea:focus,
-select:focus,
-button:focus {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-    box-shadow: none;
-}
-
-/* Add visual grouping for options */
-.mode-select,
-.tone-select,
-.context-explanation {
-    width: 100%;
-    max-width: 650px;
-    margin: 0 auto 20px;
-    border-radius: var(--border-radius);
-    background: white;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    padding: 15px;
-}
-
-/* Input methods container */
-.input-methods {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-unit);
-    margin-bottom: var(--spacing-unit);
-}
-
-/* Upload zone styling */
-.upload-zone {
-    border: 2px dashed var(--primary);
-    border-radius: var(--border-radius);
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: var(--bg-light);
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.upload-zone:hover {
-    border-color: var(--primary-hover);
-    background: #fff;
-}
-
-.upload-zone.dragover {
-    border-color: var(--primary-hover);
-    background: #fff;
-    box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
-}
-
-.upload-content {
-    pointer-events: none;
-}
-
-.upload-content span[role="img"] {
-    font-size: 2em;
-    margin-bottom: 10px;
-    display: block;
-}
-
-.upload-content p {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 0.9em;
-}
-
-/* High contrast adjustments */
-.high-contrast .upload-zone {
-    border-color: #555;
-    background: #333;
-}
-
-.high-contrast .upload-zone:hover,
-.high-contrast .upload-zone.dragover {
-    border-color: #63b3ed;
-    background: #2d3748;
-}
-
-/* Input method tabs */
-.input-methods-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.tab-button {
-    background: var(--bg-light);
-    border: 1px solid #e2e8f0;
-    padding: 8px 16px;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-size: 0.9em;
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-}
-
-.tab-button.active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-}
-
-/* Input panels */
-.input-panels {
-    position: relative;
-    min-height: 120px;  /* Reduced from default */
-}
-
-.panel {
-    display: none;
-    margin-bottom: 20px;
-}
-
-.panel.active {
-    display: block;
-}
-
-/* Speech panel specific */
-.speech-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: var(--bg-light);
-    border-radius: var(--border-radius);
-}
-
-.speech-container p {
-    margin: 0;
-    font-size: 0.9em;
-    color: var(--text-secondary);
-}
-
-/* Helper buttons */
-.input-helpers {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: -10px 0 15px 0;
-}
-
-.helper-buttons {
-    display: flex;
-    gap: 8px;
-}
-
-.helper-button {
-    background: none;
-    border: none;
-    padding: 4px 8px;
-    cursor: pointer;
-    opacity: 0.6;
-    transition: opacity 0.2s ease;
-}
-
-.helper-button:hover {
-    opacity: 1;
-}
-
-.input-actions {
-    position: absolute;
-    right: 12px;
-    top: 10px;
-    display: flex;
-    gap: 8px;
-}
-
-.action-button {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--bg-light);
-    border: 1px solid #e2e8f0;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.9em;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.action-button:hover {
-    background: white;
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-/* Context explanation with reduced prominence */
-.context-explanation {
-    padding: 15px;
-    background: var(--bg-light);
-    opacity: 0.85;
-}
-
-.context-explanation label {
-    font-size: 0.9em;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* Submit button container */
-.submit-container {
-    text-align: center;
-}
-
-/* Apply form-element class properties to all main sections */
-.mode-select,
-.tone-select,
-.context-explanation,
-.submit-container {
-    width: 100%;
-    max-width: 650px;
-    margin: 0 auto 20px;
-    border-radius: var(--border-radius);
-}
-
-/* Error states */
-.error-message {
-    color: #e53e3e;
-    font-size: 0.9em;
-    margin: 8px 0;
-    padding: 8px 12px;
-    background: #fff5f5;
-    border-radius: 6px;
-    display: none;
-}
-
-.error-message.visible {
-    display: block;
-}
-
-/* Focus states for better keyboard navigation */
-.action-button:focus-visible,
-.mode-select input:focus-visible + label,
-.context-explanation input:focus-visible + label {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-    box-shadow: none;
-}
-
-/* Loading states for buttons */
-.action-button.loading {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-.action-button.loading svg {
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
-}
-
-/* Smooth transitions for dark mode */
-.container,
-textarea,
-select,
-button,
-.mode-select,
-.tone-select,
-.context-explanation {
-    transition: background-color var(--transition-speed) ease,
-                border-color var(--transition-speed) ease,
-                color var(--transition-speed) ease,
-                box-shadow var(--transition-speed) ease;
-}
-
-/* Additional accessibility features */
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-}
-
-/* ARIA live region for status updates */
-.status-message {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-}
-
-/* Focus indicator improvements */
-*:focus-visible {
-    outline: 3px solid var(--primary);
-    outline-offset: 2px;
-    border-radius: 4px;
-}
-
-/* Mode select dark mode */
-.high-contrast .mode-select {
-    background: var(--bg-dark-secondary);
-    border-color: var(--border-dark);
-}
-
-.high-contrast .mode-select label {
-    color: var(--text-dark);
-}
-
-/* Tone select dark mode */
-.high-contrast .tone-select {
-    background: var(--bg-dark-secondary);
-    border-color: var(--border-dark);
-}
-
-.high-contrast .tone-select label {
-    color: var(--text-dark);
-}
-
-.high-contrast .tone-select select {
-    background-color: var(--bg-dark-primary);
-    color: var(--text-dark);
-    border-color: var(--border-dark);
-}
-
-.high-contrast .tone-select select option {
-    background-color: var(--bg-dark-primary);
-    color: var(--text-dark);
-}
-
-/* Context explanation dark mode */
-.high-contrast .context-explanation {
-    background: var(--bg-dark-secondary);
-    border-color: var(--border-dark);
-}
-
-.high-contrast .context-explanation label {
-    color: var(--text-dark);
-}
-
-/* High contrast mode for character count */
-.high-contrast .character-count {
-    color: var(--text-dark);
-}
-
-#result .analysis-content,
-#result .translation-content {
-    background: white;
-    padding: 15px;
-    border-radius: 6px;
-    margin-top: 8px;
-    border: 1px solid #e0e0e0;
-}
-
-#result .analysis-content {
-    position: relative;
-    padding-left: 20px;
-    border-left: 3px solid var(--primary);
-}
-
-#result .translation-content {
-    border-left: 3px solid #4CAF50;
-}
-
-/* Dark mode adjustments */
-.high-contrast #result .analysis-content,
-.high-contrast #result .translation-content {
-    background: var(--bg-dark-secondary);
-    border-color: var(--border-dark);
-}
-
-.loading-spinner {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: #fff;
-    animation: spin 1s linear infinite;
-    margin-right: 8px;
-    vertical-align: middle;
-}
-
-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
-
+  }
