@@ -34,12 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Save preference
       localStorage.setItem('highContrast', isHighContrast);
-      
-      // Update theme color for mobile browsers
-      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-      if (metaThemeColor) {
-        metaThemeColor.content = isHighContrast ? '#1a202c' : '#ffffff';
-      }
     }
     
     // Add click handler
@@ -101,10 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function restoreDarkModePreference() {
       if (localStorage.getItem('highContrast') === 'true') {
         document.documentElement.classList.add('high-contrast');
-        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-        if (metaThemeColor) {
-          metaThemeColor.content = '#1a202c';
-        }
       }
     }
     
