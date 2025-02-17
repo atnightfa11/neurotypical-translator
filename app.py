@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, jsonify, send_from_directory
 from openai import OpenAI
 from openai import OpenAIError
+from flask_talisman import Talisman
 import os
 from dotenv import load_dotenv
 from PIL import Image
@@ -11,6 +12,7 @@ from flask_limiter.util import get_remote_address
 from flask_caching import Cache
 import re
 import html
+import imghdr
 
 load_dotenv()
 
@@ -45,6 +47,23 @@ limiter = Limiter(
 
 # Initialize cache
 cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+
+# Add security headers
+Talisman(app, content_security_policy={
+    'default-src': "'self'",
+    'script-src': "'self' 'unsafe-inline' https://cdn.tailwindcss.com https://rsms.me https://plausible.io",
+    'style-src': "'self' 'unsafe-inline' https://rsms.me",
+    'img-src': "'self' data:",
+    'font-src': "'self' https://rsms.me",
+    'connect-src': "'self' https://plausible.io",
+})
+
+# Validate image uploads
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB limit
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def sanitize_input(text):
     """Sanitize user input"""
@@ -133,6 +152,29 @@ def build_prompt(input_text, mode, tone, explain_context):
     
     return prompt
 
+def validate_image(file):
+    """Validate file is a legitimate image and within size limits"""
+    try:
+        # Check file size
+        file.seek(0, 2)  # Seek to end
+        size = file.tell()
+        file.seek(0)  # Reset to beginning
+        
+        if size > MAX_FILE_SIZE:
+            return False, "File too large (max 5MB)"
+            
+        # Verify file is actually an image
+        header = file.read(512)
+        file.seek(0)
+        file_type = imghdr.what(None, header)
+        
+        if not file_type or file_type not in ALLOWED_EXTENSIONS:
+            return False, "Invalid image format"
+            
+        return True, None
+    except Exception:
+        return False, "Error validating image"
+
 @app.route("/", methods=["GET", "POST"])
 @limiter.limit("30 per minute")
 def index():
@@ -192,6 +234,9 @@ def process_image():
         return jsonify({"error": "No image uploaded"})
     
     file = request.files["image"]
+    is_valid, error = validate_image(file)
+    if not is_valid:
+        return jsonify({"error": error})
     
     try:
         image = Image.open(io.BytesIO(file.read()))
