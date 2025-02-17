@@ -13,6 +13,7 @@ from flask_caching import Cache
 import re
 import html
 import imghdr
+import hashlib
 
 load_dotenv()
 
@@ -175,6 +176,11 @@ def validate_image(file):
     except Exception:
         return False, "Error validating image"
 
+def generate_cache_key(input_text, translation_mode, tone, explain_context):
+    """Create a secure hashed cache key instead of storing raw input text."""
+    text_hash = hashlib.sha256(input_text.encode()).hexdigest()
+    return f"{text_hash}:{translation_mode}:{tone}:{explain_context}"
+
 @app.route("/", methods=["GET", "POST"])
 @limiter.limit("30 per minute")
 def index():
@@ -197,6 +203,14 @@ def index():
         if len(input_text) > 1000:
             return jsonify({"error": "Text exceeds 1000 characters. Please shorten your message."})
 
+        # Generate secure cache key
+        cache_key = generate_cache_key(input_text, translation_mode, tone, explain_context)
+        
+        # Check cache first
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            return jsonify({"result": cached_result})
+
         # Build the improved prompt
         prompt = build_prompt(input_text, translation_mode, tone, explain_context)
 
@@ -213,8 +227,7 @@ def index():
             formatted_result, error = validate_and_format_response(result)
             
             if formatted_result:
-                cache_key = f"{input_text}:{translation_mode}:{tone}:{explain_context}"
-                cache.set(cache_key, formatted_result, timeout=3600)
+                cache.set(cache_key, formatted_result, timeout=1800)
                 return jsonify({"result": formatted_result})
             else:
                 return jsonify({"error": error})
