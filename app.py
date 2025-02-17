@@ -56,40 +56,28 @@ def sanitize_input(text):
 def validate_and_format_response(text):
     """Validate and format the response for better readability"""
     try:
-        if len(text.strip()) < 10:
+        if not text or len(text.strip()) < 10:
             return None, "Response too short"
             
-        # If the response includes both Analysis and Translation, format them accordingly.
+        def create_section(title, content):
+            return f"""<div class="{title.lower()}">
+                <h3>{title}</h3>
+                <div class="{title.lower()}-content">
+                    {content.strip()}
+                </div>
+            </div>"""
+        
         if "Analysis:" in text and "Translation:" in text:
             parts = text.split("Translation:", 1)
             if len(parts) == 2:
-                analysis, translation = parts
-                analysis = analysis.replace('Analysis:', '').strip()
-                translation = translation.strip()
-                formatted = f"""<div class="analysis">
-    <h3>Analysis</h3>
-    <div class="analysis-content">
-        {analysis}
-    </div>
-</div>
-<div class="translation">
-    <h3>Translation</h3>
-    <div class="translation-content">
-        {translation}
-    </div>
-</div>"""
+                analysis = parts[0].replace('Analysis:', '').strip()
+                translation = parts[1].strip()
+                formatted = create_section("Analysis", analysis) + create_section("Translation", translation)
                 return formatted, None
         else:
-            # Otherwise, just format the translation.
-            formatted = f"""<div class="translation">
-    <h3>Translation</h3>
-    <div class="translation-content">
-        {text.strip()}
-    </div>
-</div>"""
+            formatted = create_section("Translation", text)
             return formatted, None
-                
-        return text, None
+            
     except Exception as e:
         return None, str(e)
 

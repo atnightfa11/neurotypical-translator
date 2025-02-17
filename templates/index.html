@@ -67,14 +67,24 @@
       This tool helps neurotypical &amp; neurodivergent individuals communicate.
     </p>
     <form id="translator-form" class="space-y-6">
-      <div class="mode-select form-element">
-        <label class="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300">
-          <input type="radio" name="mode" value="nt-to-nd" checked /> Neurotypical → Neurodivergent
+      <div class="translation-direction form-element">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Translation Direction:
         </label>
-        <label class="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300">
-          <input type="radio" name="mode" value="nd-to-nt" /> Neurodivergent → Neurotypical
-        </label>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <label class="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300">
+            <input type="radio" name="mode" value="nt-to-nd" checked /> 
+            <span>Neurotypical → Neurodivergent</span>
+          </label>
+          <label class="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300">
+            <input type="radio" name="mode" value="nd-to-nt" />
+            <span>Neurodivergent → Neurotypical</span>
+          </label>
+        </div>
       </div>
+
+      <hr class="border-gray-200 dark:border-gray-700 my-6" />
+
       <div class="input-area form-element">
         <div class="input-actions mb-2">
           <button type="button" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700" id="upload-button">
@@ -99,17 +109,20 @@
           Select Tone:
         </label>
         <select id="tone" name="tone" class="block w-full px-3 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary focus:border-primary rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-          <option value="neutral" selected>Neutral: Clear and polite communication</option>
-          <option value="formal">Formal: Professional and respectful language</option>
-          <option value="casual">Casual: Relaxed and friendly communication</option>
-          <option value="empathetic">Empathetic: Supportive and understanding</option>
+          <option value="neutral" selected title="Best for everyday communication">Neutral: Clear and polite communication</option>
+          <option value="formal" title="Ideal for work and professional settings">Formal: Professional and respectful language</option>
+          <option value="casual" title="Perfect for informal situations">Casual: Relaxed and friendly communication</option>
+          <option value="empathetic" title="Good for sensitive topics">Empathetic: Supportive and understanding</option>
         </select>
       </div>
       <div class="context-explanation form-element">
         <label class="inline-flex items-center space-x-2 text-gray-700 dark:text-gray-300">
-          <input type="checkbox" name="explain_context" id="explain-context" value="yes" checked />
+          <input type="checkbox" name="explain_context" id="explain-context" value="yes" />
           <span>Explain the context before translating</span>
         </label>
+        <p class="text-sm text-gray-500 mt-1 ml-6">
+          Provides analysis of social context and implied meanings before translation
+        </p>
       </div>
       <div class="submit-container form-element">
         <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150 ease-in-out">

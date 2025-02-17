@@ -45,14 +45,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Function to show toast notifications
-    function showNotification(message, type) {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
-    }
+    const notifications = {
+      show(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.classList.remove('show'), 3000);
+      },
+      error(message) {
+        this.show(message, 'error');
+      },
+      success(message) {
+        this.show(message, 'success');
+      }
+    };
     
     // Form submission handler
     form.addEventListener("submit", async function(e) {
@@ -71,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
         const result = await response.json();
         if (result.error) {
-          showNotification(result.error, "error");
+          notifications.error(result.error);
         } else {
           const resultDiv = document.getElementById("result");
           const formatted = result.result
@@ -85,15 +91,15 @@ document.addEventListener('DOMContentLoaded', function() {
           copyButton.textContent = 'Copy to Clipboard';
           copyButton.addEventListener('click', () => {
             navigator.clipboard.writeText(resultDiv.innerText)
-              .then(() => showNotification("Copied to clipboard!", "success"))
-              .catch(() => showNotification("Copy failed", "error"));
+              .then(() => notifications.success("Copied to clipboard!"))
+              .catch(() => notifications.error("Copy failed"));
           });
           resultDiv.appendChild(copyButton);
     
           resultDiv.scrollIntoView({ behavior: 'smooth' });
         }
       } catch (error) {
-        showNotification("An error occurred. Please try again.", "error");
+        notifications.error("An error occurred. Please try again.");
       } finally {
         loading.style.display = 'none';
         submitButton.disabled = false;
@@ -141,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
               </svg>
               <span>Recording...</span>`;
           } catch (err) {
-            showNotification('Failed to start recording. Please try again.', "error");
+            notifications.error('Failed to start recording. Please try again.');
             isRecording = false;
             return;
           }
@@ -190,13 +196,13 @@ document.addEventListener('DOMContentLoaded', function() {
           });
           const result = await response.json();
           if (result.error) {
-            showNotification(result.error, "error");
+            notifications.error(result.error);
           } else {
             document.getElementById('input-text').value = result.text;
             document.getElementById('input-text').dispatchEvent(new Event('input'));
           }
         } catch (error) {
-          showNotification('Error processing image. Please try again.', "error");
+          notifications.error('Error processing image. Please try again.');
         } finally {
           loading.style.display = 'none';
           uploadButton.classList.remove('loading');
