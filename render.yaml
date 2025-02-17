@@ -1,7 +1,7 @@
 services:
   - type: web
     name: neurotypical-translator
-    env: python
+    runtime: python
     buildCommand: |
       # Install system dependencies
       apt-get update -y
