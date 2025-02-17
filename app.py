@@ -89,10 +89,10 @@ def build_prompt(input_text, mode, tone, explain_context):
     explain_context: "yes" or "no"
     """
     tone_prompts = {
-        "neutral": "Use clear, factual language.",
+        "neutral": "Use clear, straightforward language that sounds natural rather than robotic.",
         "formal": "Use professional language suitable for work or academic settings.",
-        "casual": "Use relaxed language as if speaking with friends.",
-        "empathetic": "Show understanding and acknowledge emotions."
+        "casual": "Use relaxed, conversational language as if speaking with friends.",
+        "empathetic": "Use language that shows understanding and acknowledges emotions."
     }
     tone_instruction = tone_prompts.get(tone, tone_prompts["neutral"])
 
@@ -104,8 +104,9 @@ def build_prompt(input_text, mode, tone, explain_context):
                 "1. Which part of the phrase appears optional but is actually required?\n"
                 "2. Why might a neurotypical speaker use optional language?\n"
                 "3. What is the underlying expectation?\n\n"
+                "Present your analysis in a numbered format as described above. "
                 "Then, convert the phrase into a clear, direct command that removes optional language and makes implicit requirements explicit. "
-                "Retain any deadlines or key details.\n\n"
+                "Retain any deadlines or key details, and ensure the final translation is presented in natural, flowing language without numbered lists.\n\n"
                 f"Input:\n\"{input_text}\"\n\n"
                 f"Provide your Analysis and Translation. Tone: {tone_instruction}"
             )
@@ -113,7 +114,8 @@ def build_prompt(input_text, mode, tone, explain_context):
             prompt = (
                 "You are a translator between neurotypical (NT) and neurodivergent (ND) communication. "
                 "The user is neurodivergent. Convert the following neurotypical phrase into a clear, direct command that a neurodivergent individual can easily understand. "
-                "Remove any optional language and make implicit requirements explicit, while keeping all important details intact.\n\n"
+                "Remove any optional language and make implicit requirements explicit, while keeping all important details intact. "
+                "Present the translation in natural, flowing language without numbered lists.\n\n"
                 f"Input:\n\"{input_text}\"\n\n"
                 f"Direct Command: Tone: {tone_instruction}"
             )
@@ -121,7 +123,8 @@ def build_prompt(input_text, mode, tone, explain_context):
         prompt = (
             "You are a translator between neurodivergent (ND) and neurotypical (NT) communication. "
             "The user is neurodivergent. Convert the following direct ND phrase into a version that is more neurotypical-friendly. "
-            "Soften the language with polite phrasing and context while keeping the core message and important details unchanged.\n\n"
+            "Soften the language with polite phrasing and context while keeping the core message and important details unchanged. "
+            "Present the translation in natural, flowing language without numbered lists.\n\n"
             f"Input:\n\"{input_text}\"\n\n"
             f"Polite Translation: Tone: {tone_instruction}"
         )
