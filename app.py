@@ -17,13 +17,22 @@ import hashlib
 
 load_dotenv()
 
-# Set Tesseract path based on environment
-if os.path.exists('/opt/homebrew/bin/tesseract'):  # Mac with Homebrew
-    pytesseract.pytesseract.tesseract_cmd = '/opt/homebrew/bin/tesseract'
-elif os.path.exists('/usr/local/bin/tesseract'):  # Mac with alternative install
-    pytesseract.pytesseract.tesseract_cmd = '/usr/local/bin/tesseract'
-else:  # Default path
-    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+# Get Tesseract path from environment or use default paths
+tesseract_paths = [
+    os.getenv('TESSERACT_PATH'),  # From environment variable
+    '/usr/bin/tesseract',         # Linux default
+    '/usr/local/bin/tesseract',   # Mac default
+    '/opt/homebrew/bin/tesseract', # Mac Homebrew
+    'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'  # Windows
+]
+
+for path in tesseract_paths:
+    if path and os.path.exists(path):
+        pytesseract.pytesseract.tesseract_cmd = path
+        print(f"Using Tesseract at: {path}")
+        break
+else:
+    print("Warning: Tesseract not found in standard locations")
 
 print(f"Starting app with Tesseract path: {pytesseract.pytesseract.tesseract_cmd}")
 try:
@@ -253,8 +262,7 @@ def process_image():
     
     try:
         image = Image.open(io.BytesIO(file.read()))
-        tesseract_path = pytesseract.pytesseract.tesseract_cmd
-        if not os.path.exists(tesseract_path):
+        if not hasattr(pytesseract.pytesseract, 'tesseract_cmd'):
             return jsonify({"error": "OCR software not found. Please try again later."})
         
         text = pytesseract.image_to_string(image, lang='eng')
