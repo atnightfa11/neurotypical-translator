@@ -377,6 +377,12 @@
     color: #a0aec0;
   }
   
+  /* Add specific fix for app description in dark mode */
+  html.high-contrast p.description,
+  html.dark p.description {
+    color: #e0e0e0 !important;
+  }
+  
   html.high-contrast textarea,
   html.high-contrast select,
   html.high-contrast button {
