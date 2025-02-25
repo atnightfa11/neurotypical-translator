@@ -13,6 +13,8 @@ import re
 import html
 import imghdr
 import hashlib
+import werkzeug.datastructures
+import logging
 
 load_dotenv()
 
@@ -52,20 +54,27 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
+    default_limits=["100 per day", "20 per hour"],
+    storage_uri="memory://"
 )
 
-# Initialize cache
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+# Initialize cache with timeout
+cache = Cache(app, config={
+    'CACHE_TYPE': 'simple',
+    'CACHE_DEFAULT_TIMEOUT': 1800,
+    'CACHE_THRESHOLD': 1000  # Limit cache size
+})
 
 # Add security headers
 Talisman(app, content_security_policy={
     'default-src': "'self'",
-    'script-src': "'self' 'unsafe-inline' https://cdn.tailwindcss.com https://rsms.me https://plausible.io",
+    'script-src': "'self' https://cdn.tailwindcss.com https://rsms.me https://plausible.io",
     'style-src': "'self' 'unsafe-inline' https://rsms.me",
     'img-src': "'self' data:",
     'font-src': "'self' https://rsms.me",
     'connect-src': "'self' https://plausible.io",
+    'frame-ancestors': "'none'",  # Prevent clickjacking
+    'form-action': "'self'",
 })
 
 # Validate image uploads
@@ -76,19 +85,25 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def sanitize_input(text):
+    if not isinstance(text, str):
+        return ''
     text = html.escape(text)
-    text = re.sub(r'<script.*?>.*?</script>', '', text, flags=re.DOTALL)
+    text = re.sub(r'<[^>]*>', '', text, flags=re.DOTALL)  # Remove all HTML tags
     text = ' '.join(text.split())
-    return text
+    return text[:1000]  # Enforce length limit
 
 def validate_and_format_response(text):
     try:
         if not text or len(text.strip()) < 10:
             return None, "Response too short"
+        # Sanitize the response
+        text = html.escape(text)
+        # Add line breaks for readability
+        text = text.replace('\n\n', '<br><br>')
         def create_section(title, content):
-            return f"""<div class="{title.lower()}">
+            return f"""<div class="{title.lower()}" role="region" aria-label="{title}">
                 <h3>{title}</h3>
-                <div class="{title.lower()}-content">
+                <div class="{title.lower()}-content" tabindex="0">
                     {content.strip()}
                 </div>
             </div>"""
@@ -137,6 +152,8 @@ def build_prompt(input_text, mode, tone, explain_context):
 
 def validate_image(file):
     try:
+        if not file or not isinstance(file, werkzeug.datastructures.FileStorage):
+            return False, "Invalid file upload"
         file.seek(0, 2)
         size = file.tell()
         file.seek(0)
@@ -145,18 +162,20 @@ def validate_image(file):
         if size == 0:
             return False, "Empty file uploaded"
         
-        # Save the current position
-        original_position = file.tell()
+        # Create a copy of the file in memory
+        file_bytes = file.read()
+        file.seek(0)
         
         try:
-            image = Image.open(file)
+            image = Image.open(io.BytesIO(file_bytes))
             image.verify()
-            # Check image dimensions
+            
+            # Additional image validation
+            if image.format.upper() not in ['JPEG', 'PNG']:
+                return False, "Only JPEG and PNG formats are supported"
+            
             if image.size[0] * image.size[1] > 25000000:  # 25MP limit
                 return False, "Image dimensions too large"
-            
-            # Reset file position after verify()
-            file.seek(original_position)
             
         except Exception as e:
             return False, f"Invalid image file: {e}"
@@ -164,6 +183,11 @@ def validate_image(file):
         # Get file extension from original filename
         if not allowed_file(file.filename):
             return False, "Invalid image format. Please upload PNG or JPG files."
+        
+        # Add content type validation
+        content_type = file.content_type.lower()
+        if content_type not in ['image/jpeg', 'image/png']:
+            return False, "Invalid file type"
         
         return True, None
     except Exception as e:
@@ -173,10 +197,10 @@ def generate_cache_key(input_text, translation_mode, tone, explain_context):
     if not input_text:
         return None
     text_hash = hashlib.sha256(input_text.encode()).hexdigest()
-    return f"{text_hash}:{translation_mode}:{tone}:{explain_context}"
+    return f"v1:{text_hash}:{translation_mode}:{tone}:{explain_context}"  # Add version prefix
 
 @app.route("/", methods=["GET", "POST"])
-@limiter.limit("30 per minute")
+@limiter.limit("10 per minute")
 def index():
     if request.method == "POST":
         input_text = request.form.get("input_text")
@@ -228,6 +252,7 @@ def index():
     return render_template("index.html")
 
 @app.route("/process-image", methods=["POST"])
+@limiter.limit("10 per minute")
 def process_image():
     if "image" not in request.files:
         return jsonify({"error": "No image uploaded"})
@@ -241,11 +266,15 @@ def process_image():
         return jsonify({"error": error})
     
     try:
-        image = Image.open(io.BytesIO(file.read()))
+        image = Image.open(file)
+        image = image.convert('L')
+        image = image.point(lambda x: 0 if x < 128 else 255, '1')
         text = pytesseract.image_to_string(image, lang='eng').strip()
 
         if not text:
             return jsonify({"error": "No text could be extracted from the image"})
+        if len(text) > 1000:
+            return jsonify({"error": "Extracted text exceeds 1000 characters"})
 
         return jsonify({"text": text})
 
@@ -261,6 +290,22 @@ def social_preview():
 @app.route("/apple-touch-icon-precomposed.png")
 def apple_touch_icon():
     return send_from_directory('static', 'favicon.ico')
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    if isinstance(e, OpenAIError):
+        log.error(f"OpenAI API error: {str(e)}")
+        return jsonify({"error": "Service temporarily unavailable"}), 503
+    log.error(f"Unexpected error: {str(e)}")
+    return jsonify({"error": "An unexpected error occurred"}), 500
+
+# Configure logging
+log = logging.getLogger(__name__)
+log_level = os.getenv('LOG_LEVEL', 'INFO')
+logging.basicConfig(
+    level=log_level,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 if __name__ == "__main__":
     app.run(debug=True)
