@@ -1,4 +1,22 @@
+import os
 import logging
+import subprocess
+import re
+import html
+import hashlib
+import io
+
+# Third-party imports
+from flask import Flask, request, render_template, jsonify, send_from_directory
+from openai import OpenAI, OpenAIError
+from flask_talisman import Talisman
+from dotenv import load_dotenv
+from PIL import Image
+import pytesseract
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_caching import Cache
+import werkzeug.datastructures
 
 # Configure logging
 log = logging.getLogger(__name__)
@@ -7,22 +25,6 @@ logging.basicConfig(
     level=log_level,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-
-from flask import Flask, request, render_template, jsonify, send_from_directory
-from openai import OpenAI, OpenAIError
-from flask_talisman import Talisman
-import os
-from dotenv import load_dotenv
-from PIL import Image
-import pytesseract
-import io
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from flask_caching import Cache
-import re
-import html
-import hashlib
-import werkzeug.datastructures
 
 load_dotenv()
 
@@ -48,11 +50,10 @@ else:
     raise RuntimeError("Tesseract OCR is not properly installed")
 
 try:
-    import subprocess
     result = subprocess.run([pytesseract.pytesseract.tesseract_cmd, '--version'], capture_output=True, text=True)
-    print(f"Tesseract version: {result.stdout}")
+    log.info(f"Tesseract version: {result.stdout}")
 except Exception as e:
-    print(f"Failed to get Tesseract version: {str(e)}")
+    log.error(f"Failed to get Tesseract version: {str(e)}")
 
 app = Flask(__name__, static_url_path='/static', static_folder='static')
 
