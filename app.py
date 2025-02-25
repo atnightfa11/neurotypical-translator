@@ -45,9 +45,18 @@ for path in tesseract_paths:
         log.info(f"Using Tesseract at: {path}")
         tesseract_found = True
         break
-else:
-    log.error("Error: Tesseract not found in standard locations")
-    raise RuntimeError("Tesseract OCR is not properly installed")
+
+if not tesseract_found:
+    log.warning("Tesseract not found in standard locations, will attempt to use system default")
+    # Let pytesseract try to find tesseract on its own
+    try:
+        # Test if tesseract is available in PATH
+        result = subprocess.run(['tesseract', '--version'], capture_output=True, text=True)
+        log.info(f"Found system Tesseract: {result.stdout}")
+        tesseract_found = True
+    except Exception as e:
+        log.error(f"Error: Tesseract OCR is not properly installed: {str(e)}")
+        raise RuntimeError("Tesseract OCR is not properly installed. Please ensure it is installed in the system.")
 
 try:
     result = subprocess.run([pytesseract.pytesseract.tesseract_cmd, '--version'], capture_output=True, text=True)
