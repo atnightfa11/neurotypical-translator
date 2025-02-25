@@ -32,11 +32,12 @@ tesseract_found = False
 for path in tesseract_paths:
     if path and os.path.exists(path):
         pytesseract.pytesseract.tesseract_cmd = path
-        print(f"Using Tesseract at: {path}")
+        log.info(f"Using Tesseract at: {path}")
         tesseract_found = True
         break
 else:
-    print("Error: Tesseract not found in standard locations")
+    log.error("Error: Tesseract not found in standard locations")
+    raise RuntimeError("Tesseract OCR is not properly installed")
 
 try:
     import subprocess
