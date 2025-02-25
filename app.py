@@ -1,3 +1,13 @@
+import logging
+
+# Configure logging
+log = logging.getLogger(__name__)
+log_level = os.getenv('LOG_LEVEL', 'INFO')
+logging.basicConfig(
+    level=log_level,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
 from flask import Flask, request, render_template, jsonify, send_from_directory
 from openai import OpenAI, OpenAIError
 from flask_talisman import Talisman
@@ -11,10 +21,8 @@ from flask_limiter.util import get_remote_address
 from flask_caching import Cache
 import re
 import html
-import imghdr
 import hashlib
 import werkzeug.datastructures
-import logging
 
 load_dotenv()
 
@@ -299,14 +307,6 @@ def handle_exception(e):
         return jsonify({"error": "Service temporarily unavailable"}), 503
     log.error(f"Unexpected error: {str(e)}")
     return jsonify({"error": "An unexpected error occurred"}), 500
-
-# Configure logging
-log = logging.getLogger(__name__)
-log_level = os.getenv('LOG_LEVEL', 'INFO')
-logging.basicConfig(
-    level=log_level,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
 
 if __name__ == "__main__":
     app.run(debug=True)
