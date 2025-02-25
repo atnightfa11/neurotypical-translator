@@ -1,13 +1,11 @@
 services:
   - type: web
     name: neurotypical-translator
+    env: docker
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.11
-    buildFilter:
-      paths:
-      - requirements.txt
     envVarsFile: .env 

@@ -12,7 +12,6 @@ from openai import OpenAI, OpenAIError
 from flask_talisman import Talisman
 from dotenv import load_dotenv
 from PIL import Image
-import pytesseract
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_caching import Cache
@@ -28,43 +27,54 @@ logging.basicConfig(
 
 load_dotenv()
 
-# Get Tesseract path from environment or use default paths
-tesseract_paths = [
-    os.getenv('TESSERACT_PATH'),
-    '/usr/bin/tesseract',
-    '/usr/local/bin/tesseract',
-    '/opt/homebrew/bin/tesseract',
-    'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
-]
-
-# Add error handling for Tesseract path
-tesseract_found = False
-for path in tesseract_paths:
-    if path and os.path.exists(path):
-        pytesseract.pytesseract.tesseract_cmd = path
-        log.info(f"Using Tesseract at: {path}")
-        tesseract_found = True
-        break
-
-if not tesseract_found:
-    log.warning("Tesseract not found in standard locations, will attempt to use system default")
-    # Let pytesseract try to find tesseract on its own
-    try:
-        # Test if tesseract is available in PATH
-        result = subprocess.run(['tesseract', '--version'], capture_output=True, text=True)
-        log.info(f"Found system Tesseract: {result.stdout}")
-        tesseract_found = True
-    except Exception as e:
-        log.error(f"Error: Tesseract OCR is not properly installed: {str(e)}")
-        raise RuntimeError("Tesseract OCR is not properly installed. Please ensure it is installed in the system.")
-
-try:
-    result = subprocess.run([pytesseract.pytesseract.tesseract_cmd, '--version'], capture_output=True, text=True)
-    log.info(f"Tesseract version: {result.stdout}")
-except Exception as e:
-    log.error(f"Failed to get Tesseract version: {str(e)}")
-
+# Initialize Flask app right away
 app = Flask(__name__, static_url_path='/static', static_folder='static')
+
+# Feature flags object for clear indication of available features
+app_features = {
+    "text_translation": True,  # Core feature - always available
+    "image_processing": False  # Will be set to True if Tesseract is available
+}
+
+# Try to import pytesseract but handle its absence gracefully
+tesseract_available = False
+try:
+    import pytesseract
+    # Get Tesseract path from environment or use default paths
+    tesseract_paths = [
+        os.getenv('TESSERACT_PATH'),
+        '/usr/bin/tesseract',
+        '/usr/local/bin/tesseract',
+        '/opt/homebrew/bin/tesseract',
+        'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+    ]
+
+    # Check if Tesseract is installed
+    tesseract_found = False
+    for path in tesseract_paths:
+        if path and os.path.exists(path):
+            pytesseract.pytesseract.tesseract_cmd = path
+            log.info(f"Using Tesseract at: {path}")
+            tesseract_found = True
+            break
+
+    if not tesseract_found:
+        # Try system default
+        try:
+            result = subprocess.run(['tesseract', '--version'], capture_output=True, text=True)
+            log.info(f"Found system Tesseract: {result.stdout}")
+            tesseract_found = True
+            tesseract_available = True
+            app_features["image_processing"] = True
+        except Exception as e:
+            log.warning(f"Tesseract not available: {str(e)}")
+            tesseract_available = False
+    else:
+        tesseract_available = True
+        app_features["image_processing"] = True
+except ImportError:
+    log.warning("pytesseract module not available")
+    tesseract_available = False
 
 # Initialize the client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -114,7 +124,7 @@ def sanitize_input(text):
 def validate_and_format_response(text):
     try:
         if not text or len(text.strip()) < 10:
-            return None, "Response too short"
+            return None, "The response was too short. Please try again with a different input."
         # Sanitize the response
         text = html.escape(text)
         # Add line breaks for readability
@@ -137,7 +147,7 @@ def validate_and_format_response(text):
             formatted = create_section("Translation", text)
             return formatted, None
     except Exception as e:
-        return None, str(e)
+        return None, "There was a problem formatting the response. This is not your fault. Please try again."
 
 def build_prompt(input_text, mode, tone, explain_context):
     tone_prompts = {
@@ -153,16 +163,19 @@ def build_prompt(input_text, mode, tone, explain_context):
             prompt = (
                 "Translate the following neurotypical phrase into clear, direct language. "
                 "Identify any implied expectations and provide a direct command if needed. "
+                "Remove ambiguity and explicitly state any hidden expectations. "
                 f"Input: \"{input_text}\"\n\nTone: {tone_instruction}"
             )
         else:
             prompt = (
                 "Translate this neurotypical statement into a clear, direct command. "
+                "Remove ambiguity and explicitly state any hidden expectations. "
                 f"Input: \"{input_text}\"\n\nTone: {tone_instruction}"
             )
     elif mode == "nd-to-nt":
         prompt = (
             "Translate this neurodivergent statement into neurotypical-friendly language. "
+            "Add appropriate social niceties while preserving the original meaning. "
             f"Input: \"{input_text}\"\n\nTone: {tone_instruction}"
         )
     else:
@@ -170,16 +183,20 @@ def build_prompt(input_text, mode, tone, explain_context):
     return prompt
 
 def validate_image(file):
+    # Skip this function if Tesseract is not available
+    if not tesseract_available:
+        return False, "Image processing is currently not available. You can still use text translation."
+        
     try:
         if not file or not isinstance(file, werkzeug.datastructures.FileStorage):
-            return False, "Invalid file upload"
+            return False, "The file upload didn't work. Please try again or use text input instead."
         file.seek(0, 2)
         size = file.tell()
         file.seek(0)
         if size > MAX_FILE_SIZE:
-            return False, "File too large (max 5MB)"
+            return False, "The image is too large (max 5MB). Please use a smaller image or type your text."
         if size == 0:
-            return False, "Empty file uploaded"
+            return False, "The file appears to be empty. Please select a valid image file."
         
         # Create a copy of the file in memory
         file_bytes = file.read()
@@ -191,26 +208,26 @@ def validate_image(file):
             
             # Additional image validation
             if image.format.upper() not in ['JPEG', 'PNG']:
-                return False, "Only JPEG and PNG formats are supported"
+                return False, "Please use a JPEG or PNG image format."
             
             if image.size[0] * image.size[1] > 25000000:  # 25MP limit
-                return False, "Image dimensions too large"
+                return False, "The image dimensions are too large. Please use a smaller image."
             
         except Exception as e:
-            return False, f"Invalid image file: {e}"
+            return False, f"The image file couldn't be processed: {e}. Try a different image."
         
         # Get file extension from original filename
         if not allowed_file(file.filename):
-            return False, "Invalid image format. Please upload PNG or JPG files."
+            return False, "Only PNG and JPG files are accepted. Please select a different file."
         
         # Add content type validation
         content_type = file.content_type.lower()
         if content_type not in ['image/jpeg', 'image/png']:
-            return False, "Invalid file type"
+            return False, "The file type isn't supported. Please use a JPEG or PNG image."
         
         return True, None
     except Exception as e:
-        return False, f"Error validating image: {e}"
+        return False, f"There was a problem with the image: {e}. Try using text input instead."
 
 def generate_cache_key(input_text, translation_mode, tone, explain_context):
     if not input_text:
@@ -229,10 +246,10 @@ def index():
         explain_context = request.form.get("explain_context", "no").lower()
 
         if not input_text:
-            return jsonify({"error": "Please enter some text."})
+            return jsonify({"error": "Please enter some text to translate."})
 
         if len(input_text) > 1000:
-            return jsonify({"error": "Text exceeds 1000 characters. Please shorten your message."})
+            return jsonify({"error": "Text is too long (maximum 1000 characters). Please shorten your message."})
 
         cache_key = generate_cache_key(input_text, translation_mode, tone, explain_context)
         cached_result = cache.get(cache_key)
@@ -251,7 +268,7 @@ def index():
             )
 
             if not response.choices:
-                raise ValueError("No response from OpenAI API")
+                raise ValueError("No response received from the translation service")
 
             result = response.choices[0].text.strip()
             formatted_result, error = validate_and_format_response(result)
@@ -262,23 +279,28 @@ def index():
             else:
                 return jsonify({"error": error})
         except OpenAIError as e:
-            print(f"OpenAI API error: {str(e)}")
-            return jsonify({"error": "Translation service temporarily unavailable. Please try again later."})
+            log.error(f"OpenAI API error: {str(e)}")
+            return jsonify({"error": "The translation service is temporarily unavailable. Please try again in a few moments."})
         except Exception as e:
-            print(f"Unexpected error: {str(e)}")
-            return jsonify({"error": "An unexpected error occurred. Please try again."})
+            log.error(f"Unexpected error: {str(e)}")
+            return jsonify({"error": "Something went wrong. This is not your fault. Please try again."})
 
-    return render_template("index.html")
+    # Pass feature flags to the template to hide/show UI elements based on available features
+    return render_template("index.html", features=app_features)
 
 @app.route("/process-image", methods=["POST"])
 @limiter.limit("10 per minute")
 def process_image():
+    # Check if Tesseract is available
+    if not tesseract_available:
+        return jsonify({"error": "Image processing is not available right now. Please type your text instead."})
+        
     if "image" not in request.files:
-        return jsonify({"error": "No image uploaded"})
+        return jsonify({"error": "No image was uploaded. Please select an image file."})
     
     file = request.files["image"]
     if not file.filename:
-        return jsonify({"error": "No file selected"})
+        return jsonify({"error": "No file was selected. Please choose an image."})
     
     is_valid, error = validate_image(file)
     if not is_valid:
@@ -291,15 +313,15 @@ def process_image():
         text = pytesseract.image_to_string(image, lang='eng').strip()
 
         if not text:
-            return jsonify({"error": "No text could be extracted from the image"})
+            return jsonify({"error": "No text could be found in the image. Please try a clearer image or type your text."})
         if len(text) > 1000:
-            return jsonify({"error": "Extracted text exceeds 1000 characters"})
+            return jsonify({"error": "The text from the image is too long. Please use a shorter text or type it manually."})
 
         return jsonify({"text": text})
 
     except Exception as e:
-        print(f"Error processing image: {str(e)}")
-        return jsonify({"error": f"Error processing image: {str(e)}"})
+        log.error(f"Error processing image: {str(e)}")
+        return jsonify({"error": "There was a problem reading the image. Please try again or type your text."})
 
 @app.route("/static/social-preview.png")
 def social_preview():
@@ -310,13 +332,18 @@ def social_preview():
 def apple_touch_icon():
     return send_from_directory('static', 'favicon.ico')
 
+@app.route("/features")
+def get_features():
+    """Endpoint to check available features - useful for client-side adaptation"""
+    return jsonify(app_features)
+
 @app.errorhandler(Exception)
 def handle_exception(e):
     if isinstance(e, OpenAIError):
         log.error(f"OpenAI API error: {str(e)}")
-        return jsonify({"error": "Service temporarily unavailable"}), 503
+        return jsonify({"error": "The translation service is temporarily unavailable. Please try again later."}), 503
     log.error(f"Unexpected error: {str(e)}")
-    return jsonify({"error": "An unexpected error occurred"}), 500
+    return jsonify({"error": "Something went wrong. This is not your fault. Please try again."}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
