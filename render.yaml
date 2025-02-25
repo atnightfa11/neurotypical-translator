@@ -2,19 +2,12 @@ services:
   - type: web
     name: neurotypical-translator
     runtime: python
-    buildCommand: |
-      # Install system dependencies
-      apt-get update -y
-      apt-get install -y tesseract-ocr=4.1.1-2.1 tesseract-ocr-eng=1:4.1.1-2.1 libtesseract-dev=4.1.1-2.1
-      # Create symlink to ensure consistent path
-      ln -sf /usr/bin/tesseract /usr/local/bin/tesseract
-      # Verify installation
-      tesseract --version
-      # Install Python requirements
-      pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.0
-      - key: TESSERACT_PATH
-        value: /usr/bin/tesseract 
+        value: 3.11.11
+    buildFilter:
+      paths:
+      - requirements.txt
+    envVarsFile: .env 
