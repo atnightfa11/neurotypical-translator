@@ -377,9 +377,8 @@
     color: #a0aec0;
   }
   
-  /* Add specific fix for app description in dark mode */
-  html.high-contrast p.description,
-  html.dark p.description {
+  /* Fix for description text in dark mode */
+  html.high-contrast p.description {
     color: #e0e0e0 !important;
   }
   
@@ -400,6 +399,7 @@
   html.high-contrast .context-explanation {
     background: #2d3748;
     border-color: #4a5568;
+    color: #e0e0e0;
   }
   
   html.high-contrast .mode-select label,
@@ -440,6 +440,42 @@
   html.high-contrast .disclaimer {
     color: #aaa;
     border-top-color: #444;
+  }
+  
+  /* Additional dark mode fixes for all elements */
+  html.high-contrast .form-element {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    color: #e0e0e0;
+  }
+  
+  html.high-contrast .input-area {
+    background-color: #2d3748;
+    color: #e0e0e0;
+  }
+  
+  html.high-contrast .current-mode {
+    background-color: #2d3748;
+    color: #63b3ed;
+    border-color: #4a5568;
+  }
+  
+  html.high-contrast label {
+    color: #e0e0e0;
+  }
+  
+  html.high-contrast input[type="radio"] {
+    accent-color: #4299e1;
+  }
+  
+  html.high-contrast .loading {
+    color: #a0aec0;
+  }
+  
+  html.high-contrast .contrast-toggle {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e0e0e0;
   }
   
   button:disabled {

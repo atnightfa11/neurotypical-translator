@@ -24,10 +24,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Dark mode toggle function - now toggles both "high-contrast" and "dark"
     function toggleDarkMode() {
-      const html = document.documentElement;
-      html.classList.toggle('high-contrast');
-      html.classList.toggle('dark');
-      localStorage.setItem('highContrast', html.classList.contains('high-contrast'));
+      const htmlElement = document.documentElement;
+      const isDarkMode = htmlElement.classList.toggle('high-contrast');
+      
+      // Save preference to localStorage
+      localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+      
+      // Update button aria-label for accessibility
+      if (contrastToggle) {
+        contrastToggle.setAttribute('aria-label', 
+          isDarkMode ? 'Switch to light mode' : 'Switch to dark mode');
+      }
+      
+      // Announce mode change for screen readers
+      const modeAnnouncement = document.getElementById('mode-announcement');
+      if (modeAnnouncement) {
+        modeAnnouncement.textContent = `${isDarkMode ? 'Dark' : 'Light'} mode enabled`;
+      }
     }
     
     contrastToggle.addEventListener('click', toggleDarkMode);
@@ -109,9 +122,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Restore dark mode preference on page load
     function restoreDarkModePreference() {
-      if (localStorage.getItem('highContrast') === 'true') {
+      const savedMode = localStorage.getItem('darkMode');
+      if (savedMode === 'enabled') {
         document.documentElement.classList.add('high-contrast');
-        document.documentElement.classList.add('dark');
+        
+        // Update button aria-label for accessibility
+        if (contrastToggle) {
+          contrastToggle.setAttribute('aria-label', 'Switch to light mode');
+        }
       }
     }
     restoreDarkModePreference();
