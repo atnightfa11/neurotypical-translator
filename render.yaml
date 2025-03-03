@@ -1,11 +1,10 @@
 services:
   - type: web
     name: neurotypical-translator
-    env: docker
+    runtime: docker
+    buildCommand: docker build -t neurotypical-translator .
+    startCommand: docker run -p $PORT:5000 neurotypical-translator
     envVars:
       - key: OPENAI_API_KEY
         sync: false
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
     envVarsFile: .env 

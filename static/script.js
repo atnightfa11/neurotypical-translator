@@ -22,45 +22,70 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
     
-    // Dark mode toggle function - now toggles both "high-contrast" and "dark"
+    // More thorough dark mode implementation
+    function applyDarkModeToAllElements(isDarkMode) {
+      // Style all text-containing elements
+      const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, label, a, div');
+      textElements.forEach(el => {
+        if (isDarkMode) {
+          el.style.color = '#e0e0e0';
+        } else {
+          el.style.color = '';
+        }
+      });
+      
+      // Style all containers
+      const containers = document.querySelectorAll('.container, div.container, main > div, section');
+      containers.forEach(el => {
+        if (isDarkMode) {
+          el.style.backgroundColor = '#2d3748';
+          el.style.borderColor = '#4a5568';
+        } else {
+          el.style.backgroundColor = '';
+          el.style.borderColor = '';
+        }
+      });
+      
+      // Style all form elements
+      const formElements = document.querySelectorAll('input, textarea, select, button, .input-area');
+      formElements.forEach(el => {
+        if (isDarkMode) {
+          if (el.tagName === 'BUTTON' && el.type === 'submit') {
+            el.style.backgroundColor = '#4299e1';
+            el.style.color = '#ffffff';
+          } else {
+            el.style.backgroundColor = '#1a202c';
+            el.style.color = '#e0e0e0';
+          }
+          el.style.borderColor = '#4a5568';
+        } else {
+          el.style.backgroundColor = '';
+          el.style.color = '';
+          el.style.borderColor = '';
+        }
+      });
+      
+      // Style result areas
+      const resultAreas = document.querySelectorAll('#result, .result-container, .output-area');
+      resultAreas.forEach(el => {
+        if (isDarkMode) {
+          el.style.backgroundColor = '#2d3748';
+          el.style.borderColor = '#4a5568';
+          el.style.color = '#e0e0e0';
+        } else {
+          el.style.backgroundColor = '';
+          el.style.borderColor = '';
+          el.style.color = '';
+        }
+      });
+    }
+
     function toggleDarkMode() {
       const htmlElement = document.documentElement;
       const isDarkMode = htmlElement.classList.toggle('high-contrast');
       
-      // Apply dark mode to all container elements directly
-      const container = document.querySelector('.container');
-      if (container) {
-        if (isDarkMode) {
-          container.style.backgroundColor = '#2d3748';
-          container.style.color = '#e0e0e0';
-          
-          // Force all paragraphs in the container to have light text
-          const paragraphs = container.querySelectorAll('p');
-          paragraphs.forEach(p => {
-            p.style.color = '#e0e0e0';
-          });
-          
-          // Force heading to have light text
-          const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
-          headings.forEach(h => {
-            h.style.color = '#e0e0e0';
-          });
-        } else {
-          // Remove inline styles when switching back to light mode
-          container.style.backgroundColor = '';
-          container.style.color = '';
-          
-          const paragraphs = container.querySelectorAll('p');
-          paragraphs.forEach(p => {
-            p.style.color = '';
-          });
-          
-          const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
-          headings.forEach(h => {
-            h.style.color = '';
-          });
-        }
-      }
+      // Apply direct styling to ensure all elements update
+      applyDarkModeToAllElements(isDarkMode);
       
       // Save preference to localStorage
       localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
@@ -161,24 +186,8 @@ document.addEventListener('DOMContentLoaded', function() {
       if (savedMode === 'enabled') {
         document.documentElement.classList.add('high-contrast');
         
-        // Apply dark mode to container elements directly
-        const container = document.querySelector('.container');
-        if (container) {
-          container.style.backgroundColor = '#2d3748';
-          container.style.color = '#e0e0e0';
-          
-          // Force all paragraphs in the container to have light text
-          const paragraphs = container.querySelectorAll('p');
-          paragraphs.forEach(p => {
-            p.style.color = '#e0e0e0';
-          });
-          
-          // Force heading to have light text
-          const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
-          headings.forEach(h => {
-            h.style.color = '#e0e0e0';
-          });
-        }
+        // Apply direct styling to ensure all elements update
+        applyDarkModeToAllElements(true);
         
         // Update button aria-label for accessibility
         if (contrastToggle) {
@@ -186,7 +195,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     }
-    restoreDarkModePreference();
+    
+    // Initialize dark mode on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      restoreDarkModePreference();
+      
+      // Re-apply dark mode after a slight delay to catch any late-loading elements
+      setTimeout(function() {
+        if (document.documentElement.classList.contains('high-contrast')) {
+          applyDarkModeToAllElements(true);
+        }
+      }, 500);
+    });
     
     // Initialize speech recognition
     const speakButton = document.getElementById('speak-button');

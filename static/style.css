@@ -355,6 +355,7 @@
   }
   
   /* === Dark Mode (High Contrast) === */
+  /* Basic dark mode settings for entire page */
   html.high-contrast,
   html.high-contrast body {
     background: #1a202c !important;
@@ -362,135 +363,136 @@
     color: #e0e0e0 !important;
   }
   
-  /* Fix for the main container and header area */
+  /* ALL container elements */
   html.high-contrast .container,
-  html.high-contrast header,
-  html.high-contrast .header-section,
-  html.high-contrast div[role="banner"],
-  html.high-contrast main > div:first-child {
-    background: #2d3748 !important;
+  html.high-contrast div.container,
+  html.high-contrast main > div,
+  html.high-contrast section,
+  html.high-contrast .content-area,
+  html.high-contrast .app-wrapper,
+  html.high-contrast form,
+  html.high-contrast .card {
+    background-color: #2d3748 !important;
     color: #e0e0e0 !important;
     border-color: #4a5568 !important;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2) !important;
   }
   
-  /* Ensure all text in the header is visible */
-  html.high-contrast h1,
-  html.high-contrast .container h1,
-  html.high-contrast header h1 {
+  /* ALL text elements */
+  html.high-contrast h1, 
+  html.high-contrast h2,
+  html.high-contrast h3,
+  html.high-contrast h4,
+  html.high-contrast h5,
+  html.high-contrast h6,
+  html.high-contrast p,
+  html.high-contrast span,
+  html.high-contrast label,
+  html.high-contrast div,
+  html.high-contrast li,
+  html.high-contrast a {
     color: #e0e0e0 !important;
   }
   
-  /* Fix specifically for the description text */
+  /* Specifically for description text */
   html.high-contrast .description,
   html.high-contrast p.description,
-  html.high-contrast .container p,
   html.high-contrast header p {
     color: #e0e0e0 !important;
   }
   
+  /* ALL form controls */
+  html.high-contrast input,
   html.high-contrast textarea,
   html.high-contrast select,
-  html.high-contrast button {
-    background: #1a202c;
-    color: #e0e0e0;
-    border-color: #4a5568;
+  html.high-contrast button,
+  html.high-contrast .input-area,
+  html.high-contrast .select-wrapper {
+    background-color: #1a202c !important;
+    color: #e0e0e0 !important;
+    border-color: #4a5568 !important;
   }
   
-  html.high-contrast button:hover {
-    background: #374151;
-  }
-  
+  /* Form element containers */
+  html.high-contrast .form-element,
   html.high-contrast .mode-select,
   html.high-contrast .tone-select,
   html.high-contrast .context-explanation {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #e0e0e0;
+    background-color: #2d3748 !important;
+    border-color: #4a5568 !important;
+    color: #e0e0e0 !important;
   }
   
-  html.high-contrast .mode-select label,
-  html.high-contrast .tone-select label {
-    color: #e0e0e0;
-  }
-  
+  /* Submit button specifics */
   html.high-contrast button[type="submit"] {
-    background-color: #4299e1;
-    color: #ffffff;
+    background-color: #4299e1 !important;
+    color: #ffffff !important;
   }
   
   html.high-contrast button[type="submit"]:hover {
-    background-color: #3182ce;
+    background-color: #3182ce !important;
   }
   
-  html.high-contrast #result {
-    background-color: #2d3748;
-    border-color: #4a5568;
-    color: #e0e0e0;
+  /* Results area */
+  html.high-contrast #result,
+  html.high-contrast .result-container,
+  html.high-contrast .output-area {
+    background-color: #2d3748 !important;
+    border-color: #4a5568 !important;
+    color: #e0e0e0 !important;
   }
   
   html.high-contrast #result .analysis-content,
-  html.high-contrast #result .translation-content {
-    background: #1a202c;
-    border-color: #4a5568;
-    color: #e0e0e0;
+  html.high-contrast #result .translation-content,
+  html.high-contrast .result-content,
+  html.high-contrast .analysis div,
+  html.high-contrast .translation div {
+    background-color: #1a202c !important;
+    border-color: #4a5568 !important;
+    color: #e0e0e0 !important;
   }
   
-  html.high-contrast #result h3 {
-    color: #4299e1;
+  /* Headings in results */
+  html.high-contrast #result h3,
+  html.high-contrast .result-heading,
+  html.high-contrast .analysis h3,
+  html.high-contrast .translation h3 {
+    color: #4299e1 !important;
   }
   
+  /* Miscellaneous elements */
   html.high-contrast .character-count {
-    color: #9ca3af;
+    color: #9ca3af !important;
   }
   
   html.high-contrast .disclaimer {
-    color: #aaa;
-    border-top-color: #444;
-  }
-  
-  /* Additional dark mode fixes for all elements */
-  html.high-contrast .form-element {
-    background-color: #2d3748;
-    border-color: #4a5568;
-    color: #e0e0e0;
-  }
-  
-  html.high-contrast .input-area {
-    background-color: #2d3748;
-    color: #e0e0e0;
+    color: #aaa !important;
+    border-top-color: #444 !important;
   }
   
   html.high-contrast .current-mode {
-    background-color: #2d3748;
-    color: #63b3ed;
-    border-color: #4a5568;
-  }
-  
-  html.high-contrast label {
-    color: #e0e0e0;
-  }
-  
-  html.high-contrast input[type="radio"] {
-    accent-color: #4299e1;
+    background-color: #2d3748 !important;
+    color: #63b3ed !important;
+    border-color: #4a5568 !important;
   }
   
   html.high-contrast .loading {
-    color: #a0aec0;
+    color: #a0aec0 !important;
   }
   
   html.high-contrast .contrast-toggle {
-    background: #2d3748;
-    border-color: #4a5568;
-    color: #e0e0e0;
+    background-color: #2d3748 !important;
+    border-color: #4a5568 !important;
+    color: #e0e0e0 !important;
   }
   
+  /* Button states */
   button:disabled {
     opacity: 0.7;
     cursor: not-allowed;
   }
   
-  /* Remove inline style for file input by targeting its ID */
+  /* File input */
   #file-input {
     display: none;
   }  
