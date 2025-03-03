@@ -22,8 +22,90 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
     
-    // More thorough dark mode implementation
+    // Specifically target the header elements with title and description
+    function forceHeaderDarkMode(isDarkMode) {
+      // First try to find by tag and position
+      const mainTitle = document.querySelector('h1');
+      const description = document.querySelector('p.description') || 
+                         document.querySelector('.container > p') ||
+                         document.querySelector('p:nth-child(2)');
+      
+      // Target any h1 elements that might be the title
+      const allH1s = document.querySelectorAll('h1');
+      allH1s.forEach(h1 => {
+        if (isDarkMode) {
+          h1.style.color = '#e0e0e0';
+          h1.style.backgroundColor = 'transparent';
+          
+          // Try to get the parent container too
+          const parent = h1.parentElement;
+          if (parent) {
+            parent.style.backgroundColor = '#2d3748';
+            parent.style.color = '#e0e0e0';
+          }
+        } else {
+          h1.style.color = '';
+          h1.style.backgroundColor = '';
+          
+          const parent = h1.parentElement;
+          if (parent) {
+            parent.style.backgroundColor = '';
+            parent.style.color = '';
+          }
+        }
+      });
+      
+      // Target specifically the title and description
+      if (mainTitle) {
+        if (isDarkMode) {
+          mainTitle.style.color = '#e0e0e0';
+          mainTitle.style.backgroundColor = 'transparent';
+        } else {
+          mainTitle.style.color = '';
+          mainTitle.style.backgroundColor = '';
+        }
+      }
+      
+      if (description) {
+        if (isDarkMode) {
+          description.style.color = '#e0e0e0';
+          description.style.backgroundColor = 'transparent';
+        } else {
+          description.style.color = '';
+          description.style.backgroundColor = '';
+        }
+      }
+      
+      // Try to get all paragraphs, some might be the description
+      const allPs = document.querySelectorAll('p');
+      allPs.forEach(p => {
+        if (isDarkMode) {
+          p.style.color = '#e0e0e0';
+          p.style.backgroundColor = 'transparent';
+        } else {
+          p.style.color = '';
+          p.style.backgroundColor = '';
+        }
+      });
+      
+      // Also try to directly get the container
+      const container = document.querySelector('.container');
+      if (container) {
+        if (isDarkMode) {
+          container.style.backgroundColor = '#2d3748';
+          container.style.color = '#e0e0e0';
+        } else {
+          container.style.backgroundColor = '';
+          container.style.color = '';
+        }
+      }
+    }
+
     function applyDarkModeToAllElements(isDarkMode) {
+      // First target the header specifically
+      forceHeaderDarkMode(isDarkMode);
+      
+      // Then continue with other elements
       // Style all text-containing elements
       const textElements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, label, a, div');
       textElements.forEach(el => {
@@ -200,9 +282,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('DOMContentLoaded', function() {
       restoreDarkModePreference();
       
+      // Immediately force dark mode on the header if enabled
+      if (document.documentElement.classList.contains('high-contrast')) {
+        forceHeaderDarkMode(true);
+      }
+      
       // Re-apply dark mode after a slight delay to catch any late-loading elements
       setTimeout(function() {
         if (document.documentElement.classList.contains('high-contrast')) {
+          forceHeaderDarkMode(true);
           applyDarkModeToAllElements(true);
         }
       }, 500);

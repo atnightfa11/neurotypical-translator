@@ -363,6 +363,37 @@
     color: #e0e0e0 !important;
   }
   
+  /* CRITICAL: Direct targeting of header elements and app title */
+  html.high-contrast .container > h1,
+  html.high-contrast .container > div > h1,
+  html.high-contrast header h1,
+  html.high-contrast .app-title,
+  html.high-contrast .title {
+    color: #e0e0e0 !important;
+    background-color: transparent !important;
+  }
+  
+  /* CRITICAL: Direct targeting of description */
+  html.high-contrast .container > p,
+  html.high-contrast .container > div > p,
+  html.high-contrast header p,
+  html.high-contrast p.description,
+  html.high-contrast .app-description,
+  html.high-contrast .subtitle {
+    color: #e0e0e0 !important;
+    background-color: transparent !important;
+  }
+  
+  /* CRITICAL: Force header backgrounds to dark */
+  html.high-contrast .container,
+  html.high-contrast header,
+  html.high-contrast .container > div:first-child,
+  html.high-contrast .header-container,
+  html.high-contrast .title-container {
+    background-color: #2d3748 !important;
+    color: #e0e0e0 !important;
+  }
+  
   /* ALL container elements */
   html.high-contrast .container,
   html.high-contrast div.container,
