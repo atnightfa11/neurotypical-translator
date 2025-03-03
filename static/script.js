@@ -27,6 +27,41 @@ document.addEventListener('DOMContentLoaded', function() {
       const htmlElement = document.documentElement;
       const isDarkMode = htmlElement.classList.toggle('high-contrast');
       
+      // Apply dark mode to all container elements directly
+      const container = document.querySelector('.container');
+      if (container) {
+        if (isDarkMode) {
+          container.style.backgroundColor = '#2d3748';
+          container.style.color = '#e0e0e0';
+          
+          // Force all paragraphs in the container to have light text
+          const paragraphs = container.querySelectorAll('p');
+          paragraphs.forEach(p => {
+            p.style.color = '#e0e0e0';
+          });
+          
+          // Force heading to have light text
+          const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
+          headings.forEach(h => {
+            h.style.color = '#e0e0e0';
+          });
+        } else {
+          // Remove inline styles when switching back to light mode
+          container.style.backgroundColor = '';
+          container.style.color = '';
+          
+          const paragraphs = container.querySelectorAll('p');
+          paragraphs.forEach(p => {
+            p.style.color = '';
+          });
+          
+          const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
+          headings.forEach(h => {
+            h.style.color = '';
+          });
+        }
+      }
+      
       // Save preference to localStorage
       localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
       
@@ -125,6 +160,25 @@ document.addEventListener('DOMContentLoaded', function() {
       const savedMode = localStorage.getItem('darkMode');
       if (savedMode === 'enabled') {
         document.documentElement.classList.add('high-contrast');
+        
+        // Apply dark mode to container elements directly
+        const container = document.querySelector('.container');
+        if (container) {
+          container.style.backgroundColor = '#2d3748';
+          container.style.color = '#e0e0e0';
+          
+          // Force all paragraphs in the container to have light text
+          const paragraphs = container.querySelectorAll('p');
+          paragraphs.forEach(p => {
+            p.style.color = '#e0e0e0';
+          });
+          
+          // Force heading to have light text
+          const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
+          headings.forEach(h => {
+            h.style.color = '#e0e0e0';
+          });
+        }
         
         // Update button aria-label for accessibility
         if (contrastToggle) {
