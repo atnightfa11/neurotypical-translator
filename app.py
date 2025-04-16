@@ -7,7 +7,7 @@ import hashlib
 import io
 
 # Third-party imports
-from flask import Flask, request, render_template, jsonify, send_from_directory
+from flask import Flask, request, render_template, jsonify, send_from_directory, abort
 from openai import OpenAI, OpenAIError
 from flask_talisman import Talisman
 from dotenv import load_dotenv
@@ -29,6 +29,12 @@ load_dotenv()
 
 # Initialize Flask app right away
 app = Flask(__name__, static_url_path='/static', static_folder='static')
+
+@app.before_request
+def block_suspicious_files():
+    blocked = ['.env', '.git', '.DS_Store', 'sitemap.xml.gz']
+    if any(x in request.path for x in blocked):
+        return abort(404)
 
 # Feature flags object for clear indication of available features
 app_features = {
