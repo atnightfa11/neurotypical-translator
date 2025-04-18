@@ -338,6 +338,10 @@ def social_preview():
 def apple_touch_icon():
     return send_from_directory('static', 'favicon.ico')
 
+@app.route('/robots.txt')
+def robots_txt():
+    return "User-agent: *\nDisallow:\n", 200, {"Content-Type": "text/plain"}
+
 @app.route("/features")
 def get_features():
     """Endpoint to check available features - useful for client-side adaptation"""
