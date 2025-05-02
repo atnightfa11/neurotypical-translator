@@ -7,7 +7,15 @@ import hashlib
 import io
 
 # Third-party imports
-from flask import Flask, request, render_template, jsonify, send_from_directory, abort
+from flask import (
+    Flask,
+    request,
+    render_template,
+    jsonify,
+    send_from_directory,
+    abort,
+    session
+)
 from openai import OpenAI, OpenAIError
 from flask_talisman import Talisman
 from dotenv import load_dotenv
@@ -29,6 +37,8 @@ load_dotenv()
 
 # Initialize Flask app right away
 app = Flask(__name__, static_url_path='/static', static_folder='static')
+# Ensure sessions work
+app.secret_key = os.getenv('SECRET_KEY', os.getenv('FLASK_SECRET_KEY', 'your-secret-key'))
 
 @app.before_request
 def block_suspicious_files():
@@ -108,7 +118,7 @@ Talisman(app, content_security_policy={
     'img-src': "'self' data:",
     'font-src': "'self' https://rsms.me",
     'connect-src': "'self' https://plausible.io",
-    'frame-ancestors': "'none'",  # Prevent clickjacking
+    'frame-ancestors': "'none'",
     'form-action': "'self'",
 })
 
@@ -123,17 +133,15 @@ def sanitize_input(text):
     if not isinstance(text, str):
         return ''
     text = html.escape(text)
-    text = re.sub(r'<[^>]*>', '', text, flags=re.DOTALL)  # Remove all HTML tags
+    text = re.sub(r'<[^>]*>', '', text, flags=re.DOTALL)
     text = ' '.join(text.split())
-    return text[:1000]  # Enforce length limit
+    return text[:1000]
 
 def validate_and_format_response(text):
     try:
         if not text or len(text.strip()) < 10:
             return None, "The response was too short. Please try again with a different input."
-        # Sanitize the response
         text = html.escape(text)
-        # Add line breaks for readability
         text = text.replace('\n\n', '<br><br>')
         def create_section(title, content):
             return f"""<div class="{title.lower()}" role="region" aria-label="{title}">
@@ -152,8 +160,8 @@ def validate_and_format_response(text):
         else:
             formatted = create_section("Translation", text)
             return formatted, None
-    except Exception as e:
-        return None, "There was a problem formatting the response. This is not your fault. Please try again."
+    except Exception:
+        return None, "There was a problem formatting the response. Please try again."
 
 def build_prompt(input_text, mode, tone, explain_context):
     tone_prompts = {
@@ -189,10 +197,8 @@ def build_prompt(input_text, mode, tone, explain_context):
     return prompt
 
 def validate_image(file):
-    # Skip this function if Tesseract is not available
     if not tesseract_available:
         return False, "Image processing is currently not available. You can still use text translation."
-        
     try:
         if not file or not isinstance(file, werkzeug.datastructures.FileStorage):
             return False, "The file upload didn't work. Please try again or use text input instead."
@@ -200,70 +206,52 @@ def validate_image(file):
         size = file.tell()
         file.seek(0)
         if size > MAX_FILE_SIZE:
-            return False, "The image is too large (max 5MB). Please use a smaller image or type your text."
+            return False, "The image is too large (max 5MB)."
         if size == 0:
             return False, "The file appears to be empty. Please select a valid image file."
-        
-        # Create a copy of the file in memory
+
         file_bytes = file.read()
         file.seek(0)
-        
-        try:
-            image = Image.open(io.BytesIO(file_bytes))
-            image.verify()
-            
-            # Additional image validation
-            if image.format.upper() not in ['JPEG', 'PNG']:
-                return False, "Please use a JPEG or PNG image format."
-            
-            if image.size[0] * image.size[1] > 25000000:  # 25MP limit
-                return False, "The image dimensions are too large. Please use a smaller image."
-            
-        except Exception as e:
-            return False, f"The image file couldn't be processed: {e}. Try a different image."
-        
-        # Get file extension from original filename
+        image = Image.open(io.BytesIO(file_bytes))
+        image.verify()
+        if image.format.upper() not in ['JPEG', 'PNG']:
+            return False, "Please use a JPEG or PNG image format."
+        if image.size[0] * image.size[1] > 25000000:
+            return False, "The image dimensions are too large. Please use a smaller image."
         if not allowed_file(file.filename):
-            return False, "Only PNG and JPG files are accepted. Please select a different file."
-        
-        # Add content type validation
+            return False, "Only PNG and JPG files are accepted."
         content_type = file.content_type.lower()
         if content_type not in ['image/jpeg', 'image/png']:
-            return False, "The file type isn't supported. Please use a JPEG or PNG image."
-        
+            return False, "The file type isn't supported."
         return True, None
     except Exception as e:
-        return False, f"There was a problem with the image: {e}. Try using text input instead."
+        return False, f"There was a problem with the image: {e}"
 
 def generate_cache_key(input_text, translation_mode, tone, explain_context):
     if not input_text:
         return None
     text_hash = hashlib.sha256(input_text.encode()).hexdigest()
-    return f"v1:{text_hash}:{translation_mode}:{tone}:{explain_context}"  # Add version prefix
+    return f"v1:{text_hash}:{translation_mode}:{tone}:{explain_context}"
 
 @app.route("/", methods=["GET", "POST"])
 @limiter.limit("10 per minute")
 def index():
     if request.method == "POST":
-        input_text = request.form.get("input_text")
-        input_text = sanitize_input(input_text)
+        input_text = sanitize_input(request.form.get("input_text"))
         translation_mode = request.form.get("mode")
         tone = request.form.get("tone", "neutral").lower()
         explain_context = request.form.get("explain_context", "no").lower()
 
         if not input_text:
             return jsonify({"error": "Please enter some text to translate."})
-
         if len(input_text) > 1000:
-            return jsonify({"error": "Text is too long (maximum 1000 characters). Please shorten your message."})
-
+            return jsonify({"error": "Text is too long (max 1000 chars)."})
         cache_key = generate_cache_key(input_text, translation_mode, tone, explain_context)
         cached_result = cache.get(cache_key)
         if cached_result:
             return jsonify({"result": cached_result})
 
         prompt = build_prompt(input_text, translation_mode, tone, explain_context)
-
         try:
             response = client.completions.create(
                 model="gpt-3.5-turbo-instruct",
@@ -272,62 +260,46 @@ def index():
                 temperature=0.7,
                 presence_penalty=0.6
             )
-
             if not response.choices:
-                raise ValueError("No response received from the translation service")
-
+                raise ValueError("No response from translation service")
             result = response.choices[0].text.strip()
             formatted_result, error = validate_and_format_response(result)
-
             if formatted_result:
-                cache.set(cache_key, formatted_result, timeout=1800)
+                cache.set(cache_key, formatted_result)
                 return jsonify({"result": formatted_result})
             else:
                 return jsonify({"error": error})
         except OpenAIError as e:
-            log.error(f"OpenAI API error: {str(e)}")
-            return jsonify({"error": "The translation service is temporarily unavailable. Please try again in a few moments."})
+            log.error(f"OpenAI API error: {e}")
+            return jsonify({"error": "Translation service unavailable."})
         except Exception as e:
-            log.error(f"Unexpected error: {str(e)}")
-            return jsonify({"error": "Something went wrong. This is not your fault. Please try again."})
+            log.error(f"Unexpected error: {e}")
+            return jsonify({"error": "Something went wrong."})
 
-    # Pass feature flags to the template to hide/show UI elements based on available features
     return render_template("index.html", features=app_features)
 
 @app.route("/process-image", methods=["POST"])
 @limiter.limit("10 per minute")
 def process_image():
-    # Check if Tesseract is available
     if not tesseract_available:
-        return jsonify({"error": "Image processing is not available right now. Please type your text instead."})
-        
+        return jsonify({"error": "Image processing unavailable."})
     if "image" not in request.files:
-        return jsonify({"error": "No image was uploaded. Please select an image file."})
-    
+        return jsonify({"error": "No image uploaded."})
     file = request.files["image"]
-    if not file.filename:
-        return jsonify({"error": "No file was selected. Please choose an image."})
-    
     is_valid, error = validate_image(file)
     if not is_valid:
         return jsonify({"error": error})
-    
     try:
-        image = Image.open(file)
-        image = image.convert('L')
-        image = image.point(lambda x: 0 if x < 128 else 255, '1')
+        image = Image.open(file).convert('L').point(lambda x: 0 if x < 128 else 255, '1')
         text = pytesseract.image_to_string(image, lang='eng').strip()
-
         if not text:
-            return jsonify({"error": "No text could be found in the image. Please try a clearer image or type your text."})
+            return jsonify({"error": "No text found in image."})
         if len(text) > 1000:
-            return jsonify({"error": "The text from the image is too long. Please use a shorter text or type it manually."})
-
+            return jsonify({"error": "Extracted text too long."})
         return jsonify({"text": text})
-
     except Exception as e:
-        log.error(f"Error processing image: {str(e)}")
-        return jsonify({"error": "There was a problem reading the image. Please try again or type your text."})
+        log.error(f"Error processing image: {e}")
+        return jsonify({"error": "Problem reading image."})
 
 @app.route("/static/social-preview.png")
 def social_preview():
@@ -342,19 +314,23 @@ def apple_touch_icon():
 def robots_txt():
     return "User-agent: *\nDisallow:\n", 200, {"Content-Type": "text/plain"}
 
+# ← Inserted! this marks real-browser sessions
+@app.route("/__browser_ping", methods=["POST"])
+def browser_ping():
+    session["is_browser"] = True
+    return "", 204
+
 @app.route("/features")
 def get_features():
-    """Endpoint to check available features - useful for client-side adaptation"""
     return jsonify(app_features)
 
 @app.errorhandler(Exception)
 def handle_exception(e):
     if isinstance(e, OpenAIError):
-        log.error(f"OpenAI API error: {str(e)}")
-        return jsonify({"error": "The translation service is temporarily unavailable. Please try again later."}), 503
-    log.error(f"Unexpected error: {str(e)}")
-    return jsonify({"error": "Something went wrong. This is not your fault. Please try again."}), 500
+        log.error(f"OpenAI API error: {e}")
+        return jsonify({"error": "Translation service unavailable."}), 503
+    log.error(f"Unexpected error: {e}")
+    return jsonify({"error": "Something went wrong."}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
-    

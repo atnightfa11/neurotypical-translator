@@ -153,5 +153,11 @@
   <input type="file" id="file-input" class="hidden" aria-label="File upload" />
   
   <script src="/static/script.js?v=1"></script>
+  <script>
+    fetch("/__browser_ping", {
+      method: "POST",
+      credentials: "include"
+    })
+  </script>
 </body>
 </html>
